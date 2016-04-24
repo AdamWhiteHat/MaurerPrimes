@@ -45,3 +45,15 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+
+AlgorithmLibrary/obj/*
+AlgorithmLibrary/bin/*
+
+MaurerConsole/obj/*
+MaurerConsole/bin/*
+
+MaurerWinform/obj/*
+MaurerWinform/bin/*
+
+*.suo

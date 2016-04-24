@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaurerWinform", "MaurerWinform\MaurerWinform.csproj", "{F1DCA0CB-1CF9-4BEA-B3F5-76B20907EB00}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgorithmLibrary", "AlgorithmLibrary\AlgorithmLibrary.csproj", "{6ECB615B-47DB-4998-8346-80D4D49DF983}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaurerConsole", "MaurerConsole\MaurerConsole.csproj", "{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F1DCA0CB-1CF9-4BEA-B3F5-76B20907EB00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1DCA0CB-1CF9-4BEA-B3F5-76B20907EB00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1DCA0CB-1CF9-4BEA-B3F5-76B20907EB00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1DCA0CB-1CF9-4BEA-B3F5-76B20907EB00}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6ECB615B-47DB-4998-8346-80D4D49DF983}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6ECB615B-47DB-4998-8346-80D4D49DF983}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6ECB615B-47DB-4998-8346-80D4D49DF983}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6ECB615B-47DB-4998-8346-80D4D49DF983}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
