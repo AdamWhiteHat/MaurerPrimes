@@ -32,6 +32,7 @@
 			this.tbOutput = new System.Windows.Forms.TextBox();
 			this.tbNumberOfBits = new System.Windows.Forms.TextBox();
 			this.btnPrimalityTest = new System.Windows.Forms.Button();
+			this.btnMultiply = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnSearch
@@ -68,7 +69,7 @@
 			// 
 			// btnPrimalityTest
 			// 
-			this.btnPrimalityTest.Location = new System.Drawing.Point(733, 3);
+			this.btnPrimalityTest.Location = new System.Drawing.Point(567, 1);
 			this.btnPrimalityTest.Name = "btnPrimalityTest";
 			this.btnPrimalityTest.Size = new System.Drawing.Size(115, 22);
 			this.btnPrimalityTest.TabIndex = 3;
@@ -76,11 +77,22 @@
 			this.btnPrimalityTest.UseVisualStyleBackColor = true;
 			this.btnPrimalityTest.Click += new System.EventHandler(this.btnPrimalityTest_Click);
 			// 
+			// btnMultiply
+			// 
+			this.btnMultiply.Location = new System.Drawing.Point(683, 1);
+			this.btnMultiply.Name = "btnMultiply";
+			this.btnMultiply.Size = new System.Drawing.Size(165, 22);
+			this.btnMultiply.TabIndex = 4;
+			this.btnMultiply.Text = "Multiply two large numbers";
+			this.btnMultiply.UseVisualStyleBackColor = true;
+			this.btnMultiply.Click += new System.EventHandler(this.btnMultiply_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(852, 436);
+			this.Controls.Add(this.btnMultiply);
 			this.Controls.Add(this.btnPrimalityTest);
 			this.Controls.Add(this.tbNumberOfBits);
 			this.Controls.Add(this.tbOutput);
@@ -98,5 +110,6 @@
 		private System.Windows.Forms.TextBox tbOutput;
 		private System.Windows.Forms.TextBox tbNumberOfBits;
 		private System.Windows.Forms.Button btnPrimalityTest;
+		private System.Windows.Forms.Button btnMultiply;
 	}
 }

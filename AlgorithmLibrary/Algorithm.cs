@@ -9,41 +9,23 @@ using AlgorithmLibrary;
 
 namespace AlgorithmLibrary.MaurerPrimes
 {
-	public enum LoggingMethodType
-	{
-		Stream,
-		Console,
-		None
-	}
+	public delegate void LogMethodDelegate(string message);
+	public delegate void ReportProgressMethodDelegate();
 
 	public class Algorithm : IDisposable
 	{
-		private CryptoRNG cryptoRandom;
+		public static readonly BigInteger Two = new BigInteger(2);
 		private bool IsDisposed = false;
 		private CancellationToken cancelToken;
-
-		private bool isLoggingEnabled;
-		private MemoryStream logMemoryStream;
-		private StreamWriter logStreamWriter;		
-		private static string logFilename = "Algorithm.MethodCalls.log.txt";
-		private LoggingMethodType loggingType { get; set; }
 
 		private int recursionDepthCount;
 
 		public Algorithm()
 		{
 			disposeCheck();
-			cryptoRandom = new CryptoRNG();
 			cancelToken = new CancellationToken();
-
-			isLoggingEnabled = false;
-			loggingType = LoggingMethodType.None;
-
-			logMemoryStream = new MemoryStream();
-			logStreamWriter = new StreamWriter(logMemoryStream);
-			logStreamWriter.AutoFlush = true;
-
-			recursionDepthCount = 0;			
+			
+			recursionDepthCount = 0;
 		}
 
 		public Algorithm(CancellationToken cancellationToken)
@@ -62,15 +44,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 			if (!IsDisposed)
 			{
 				IsDisposed = true;
-				cryptoRandom.Dispose();
-
-				File.WriteAllText(logFilename, GetLogData());
-
-				logStreamWriter.Close();
-				logMemoryStream.Close();
-
-				logStreamWriter.Dispose();
-				logMemoryStream.Dispose();
+				CryptoRandomSingleton.Dispose();
 			}
 		}
 
@@ -78,7 +52,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		{
 			if (IsDisposed)
 			{
-				throw new ObjectDisposedException("Algorithm");
+				throw new ObjectDisposedException(nameof(Algorithm));
 			}
 		}
 
@@ -86,144 +60,59 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 		#region Logging Members
 
-		public string GetLogData()
+		private void EnterMethod(string methodName, params object[] args)
 		{
-			//disposeCheck();
-
-			if (logMemoryStream != null)
-			{
-				FileStream logFileStream = new FileStream(logFilename, FileMode.Create);
-				logMemoryStream.WriteTo(logFileStream);
-				logFileStream.Flush();
-				logFileStream.Close();
-				logFileStream.Dispose();				
-				return File.ReadAllText(logFilename);
-			}
-			return "";
-		}
-		
-		public void SetLoggingBehavior(bool enable, LoggingMethodType loggingMethod)
-		{
-			isLoggingEnabled = enable;
-			loggingType = loggingMethod;
+			LoggerSingleton.Log("{0}{1}({2})", GetDepthPadding(), methodName, string.Join(", ", args.ToString()));
+			LoggerSingleton.Log(GetDepthPadding() + "{");
+			recursionDepthCount++;
 		}
 
-		int repeatLogCount = 0;
-		string lastLogString = " ";
-		/// <summary>
-		/// LOGGING
-		/// </summary>
-		private void Log(string format, params object[] args)
+		private void LeaveMethod()
 		{
-			disposeCheck();
-			if (isLoggingEnabled)
-			{
-				if (string.IsNullOrWhiteSpace(format))
-				{
-					InvokeLoggingMethod(Environment.NewLine);
-				}
-				else
-				{
-					string input = "";
-					if (args == null || args.Count() < 1) { input = string.Format(format); }
-					else { input = string.Format(format, args); }
-
-					//logStreamWriter.WriteLine(input);
-
-					if (input == lastLogString)
-					{
-						repeatLogCount += 1;
-					}
-					else
-					{
-						InvokeLoggingMethod(lastLogString);
-						if (repeatLogCount > 0)
-						{
-							InvokeLoggingMethod(string.Format(" [{0}]", repeatLogCount));
-							repeatLogCount = 0;
-						}
-						InvokeLoggingMethod(Environment.NewLine);
-						lastLogString = input;
-					}
-				}
-			}
+			recursionDepthCount--;
+			LoggerSingleton.Log(GetDepthPadding() + "}");
 		}
 
-		private void InvokeLoggingMethod(string textToLog)
+		private void LogMethod(string message, params object[] args)
 		{
-			if (loggingType == LoggingMethodType.None || string.IsNullOrEmpty(textToLog))
-			{
-				return;
-			}
-			else if (loggingType == LoggingMethodType.Stream)
-			{
-				logStreamWriter.Write(textToLog);
-			}
-			else if (loggingType == LoggingMethodType.Console)
-			{
-				Console.Write(textToLog);
-			}
+			LoggerSingleton.Log(GetDepthPadding() + string.Format(message, args));
 		}
-		
-		private int cachedDepthCount = 0;
-		private string cachedPadding = "";
+
 		private string GetDepthPadding()
 		{
-			if (cachedDepthCount != recursionDepthCount)
-			{				
-				cachedDepthCount = recursionDepthCount;
-				if (recursionDepthCount < 1)
-				{
-					cachedPadding = "";
-				}
-				else
-				{
-					cachedPadding = new string(Enumerable.Repeat(' ', recursionDepthCount + 1).ToArray());
-				}			
+			if (recursionDepthCount > 0)
+			{
+				return new string(Enumerable.Repeat(' ', recursionDepthCount).ToArray());
 			}
-			return cachedPadding;
+			else
+			{
+				return "";
+			}
 		}
-		
+
 		#endregion
 
 		public BigInteger ProvablePrime(int bits)
 		{
 			disposeCheck();
-			BigInteger result = 0;
+			BigInteger hopeful = 0;
 
-			if (loggingType == LoggingMethodType.None)
-			{
-				Console.Write(".");
-			}
-			else
-			{
-				Log("{0}-->ENTERING: ProvablePrime({1})", GetDepthPadding(), bits);
-			}
+			Console.Write(".");
+			EnterMethod(nameof(ProvablePrime), bits);
+
 
 			if (cancelToken.IsCancellationRequested)
 			{
+				LogMethod("{0}: CancellationToken.IsCancellationRequested", nameof(ProvablePrime));
+				LeaveMethod();
 				return -1;
 			}
 
 			if (bits <= 20)
-			{
-				if (loggingType == LoggingMethodType.None)
-				{
-					Console.Write(string.Format("\b] ({0})", recursionDepthCount));
-					Console.WriteLine();
-					Console.Write(" [");
-
-					int top = Console.CursorTop;
-					int left = Console.CursorLeft;
-					Console.SetCursorPosition(left + recursionDepthCount, top);
-					Console.Write("]");
-					Console.SetCursorPosition(left, top);
-				}
-				else
-				{
-					Log("{0}***MAXIMUM RECURSION DEPT REACHED: {1}", GetDepthPadding(), recursionDepthCount);
-				}
-				result = FindSmallPrime(bits);
+			{				
+				LogMethod("***MAXIMUM RECURSION DEPT REACHED: {0}", recursionDepthCount);
+				hopeful = CheckForSmallComposites(bits);
+				LogMethod("***Hopeful prime: {0}", hopeful);
 			}
 			else
 			{
@@ -238,7 +127,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 					done = false;
 					while (!done)
 					{
-						rnd = cryptoRandom.NextDouble();
+						rnd = CryptoRandomSingleton.NextDouble();
 						r = Math.Pow(2, rnd - 1);
 						done = (bits - r * bits) > m;
 					}
@@ -246,20 +135,17 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 				int newBits = (int)Math.Floor(r * bits) + 1;
 
-				recursionDepthCount++;
 				BigInteger smallPrime = ProvablePrime(newBits);
-				recursionDepthCount--;
 
 				if (smallPrime == -1)
 				{
+					LeaveMethod();
 					return -1;
 				}
+				LogMethod("After Recursion: Length = {0}", smallPrime.ToString().Length);
 
-				//Log("After Recursion: Length = {0}{1}", smallPrime.ToString().Length, Environment.NewLine);
-
-				BigInteger two = 2;
-				BigInteger pow = BigInteger.Pow(two, bits - 1);
-				BigInteger Q = two * smallPrime;
+				BigInteger pow = BigInteger.Pow(Two, bits - 1);
+				BigInteger Q = Two * smallPrime;
 				BigInteger I = pow / Q;
 
 				long sieveMax = (long)(c * bits * bits);
@@ -270,87 +156,69 @@ namespace AlgorithmLibrary.MaurerPrimes
 				{
 					if (cancelToken.IsCancellationRequested)
 					{
+						LogMethod("CancellationToken.IsCancellationRequested");
+						LeaveMethod();
 						return -1;
 					}
 
-					//Log(" Loop[{0}]: TestComposite({1})", _loopCount, result);
+					//LogMethod("Loop[{0}]: TestComposite({1})", _loopCount, result);
 
 					done = false;
 					BigInteger J = I + 1;
 					BigInteger K = 2 * I;
-					BigInteger randRange = RandomRange(J, K);
-
-					result = 2 * randRange;
-					result = result * smallPrime;
-					result = result + 1;
+					BigInteger rand1 = CryptoRandomSingleton.RandomRange(J, K);
+					hopeful = 2 * rand1;
+					hopeful = hopeful * smallPrime;
+					hopeful = hopeful + 1;
 
 					BigInteger mod = new BigInteger();
 					for (int i = 0; !done && i < primes.Count; i++)
 					{
-						mod = result % primes[i];
+						mod = hopeful % primes[i];
 						done = mod == 0;
 					}
 
 					if (!done)
 					{
-						if (MillerRabinPrimalityTest(result, 20))
+						//LogMethod("ProvablePrime.RandomRange(J: {0}, K: {1}) = {2}", J, K, rand1);
+						if (MillerRabinPrimalityTest(hopeful, 20))
 						{
-							//Log("  Passed: Composite Test ({0})", result);
-							BigInteger rand = RandomRange(two, result - two);
-							BigInteger modPow = BigInteger.ModPow(rand, result - 1, result);
+							string cert = GetCertificateOfPrimality(hopeful, rand1);
 
-							if (modPow == 1)
+							if (cert != null)
 							{
-								//Log("   Passed: ModPow({0}, {1}, {2}) == 1", rand, result-1, result);
-								modPow = BigInteger.ModPow(rand, 2 * randRange, result);
-								BigInteger gcd = BigInteger.GreatestCommonDivisor(modPow - 1, result);
-								success = (gcd == 1);
-								if (success)
-								{
-									//string log10prime = (Math.Round(BigInteger.Log10(result))).ToString("F0");
-									if (loggingType == LoggingMethodType.None)
-									{
-										Console.Write(".");
-									}
-									else
-									{
-										string log2prime = (Math.Round(Algorithm.Log2(result))).ToString("F0");
-										Log("{0}<--LEAVING: ProvablePrime(): Return {1,3} bit prime", GetDepthPadding(), log2prime);//, result.ToString());
-									}									
-								}
+								LoggerSingleton.Log(cert);
+								success = true;
 							}
 						}
 					}
 				}
 			}
 
-			return result;
+			LeaveMethod();
+			return hopeful;
 		}
 
-		public static double Log2(BigInteger n)
-		{
-			return BigInteger.Log10(n) / Math.Log10(2);
-		}
-
-		public bool MillerRabinPrimalityTest(BigInteger n, int t)
+		public bool MillerRabinPrimalityTest(BigInteger hopeful, int accuracy)
 		{
 			disposeCheck();
-			//string nStr = n.ToString().Substring(0, nStr.Length > 8 ? 8 : nStr.Length);
-			//Log("{0}Composite()",GetDepthPadding());//("Composite({0}, {1})", nStr, t);
+			EnterMethod(nameof(MillerRabinPrimalityTest), hopeful, accuracy);
 
-			if (n == 2 || n == 3)
+			if (hopeful == 2 || hopeful == 3)
 			{
+				LeaveMethod();
 				return true;
 			}
 
-			BigInteger m = n % 2;
+			BigInteger m = hopeful % 2;
 
 			if (m == 0)
 			{
+				LeaveMethod();
 				return false;
 			}
 
-			BigInteger n1 = n - 1;
+			BigInteger n1 = hopeful - 1;
 			BigInteger r = n1;
 
 			m = r % 2;
@@ -363,16 +231,16 @@ namespace AlgorithmLibrary.MaurerPrimes
 				s++;
 			}
 
-			BigInteger n2 = n - 2;
-			BigInteger a;
+			BigInteger n2 = hopeful - 2;
+			BigInteger a = 0;
 			BigInteger y;
 
 			int i = 1;
 			int j = 1;
-			for (i = 1; i <= t; i++)
+			for (i = 1; i <= accuracy; i++)
 			{
-				a = RandomRange(2, n2);
-				y = BigInteger.ModPow(a, r, n);
+				a = CryptoRandomSingleton.RandomRange(2, n2);
+				y = BigInteger.ModPow(a, r, hopeful);
 
 				if (y != 1 && y != n1)
 				{
@@ -380,10 +248,11 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 					while (j <= s && y != n1)
 					{
-						y = BigInteger.ModPow(y, 2, n);
+						y = BigInteger.ModPow(y, 2, hopeful);
 
 						if (y == 1)
 						{
+							LeaveMethod();
 							return false;
 						}
 
@@ -392,63 +261,57 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 					if (y != n1)
 					{
+						LeaveMethod();
 						return false;
 					}
 				}
 			}
 
+			LeaveMethod();
 			return true;
 		}
 
-		public BigInteger RandomRange(BigInteger lower, BigInteger upper)
+		public string GetCertificateOfPrimality(BigInteger probable, BigInteger accuracy)
 		{
-			disposeCheck();
-			if (lower <= long.MaxValue && upper <= long.MaxValue && lower < upper)
+			BigInteger witness = CryptoRandomSingleton.RandomRange(Two, probable - Two);
+			BigInteger modPow = BigInteger.ModPow(witness, probable - 1, probable);
+
+			string result = null;
+			if (modPow == 1) // a^n-1 mod n == 1
 			{
-				//string lStr = lower.ToString().Substring(0, lStr.Length > 8 ? 8 : lStr.Length);
-				//string uStr = upper.ToString().Substring(0, uStr.Length > 8 ? 8 : uStr.Length);
-				//Log("{0}RandomRange()", GetDepthPadding());//("RandomRange({0}, {1})", lower, upper);
+				modPow = BigInteger.ModPow(witness, 2 * accuracy, probable);
+				BigInteger gcd = BigInteger.GreatestCommonDivisor(modPow - 1, probable);
+				bool success = (gcd == 1);
 
-				BigInteger range;
-
-				while (true)
+				if (success)
 				{
-					range = lower + (long)(((long)upper - (long)lower) * cryptoRandom.NextDouble());
+					LogMethod("GetCertificateOfPrimality.RandomRange({0}, {1}) = {2}", Two, (probable - Two), witness);
 
-					if (range >= lower && range <= upper)
-					{
-						return range;
-					}
+					Console.Write(".");
+					result = GetDepthPadding() + string.Format("Certificate of primality for: {0}{1}", probable, Environment.NewLine);
+					result += GetDepthPadding() + "{" + Environment.NewLine;
+					result += GetDepthPadding() + string.Format(" {0} ^ {1}-1 mod {1} == 1{2}", witness, probable, Environment.NewLine);
+					result += GetDepthPadding() + string.Format(" GCD({0}, {1}) == 1{2}", (modPow - 1), probable, Environment.NewLine);
+					result += GetDepthPadding() + "}";
 				}
 			}
 
-			BigInteger delta = upper - lower;
-			byte[] deltaBytes = delta.ToByteArray();
-			byte[] buffer = new byte[deltaBytes.Length];
-
-			BigInteger result;
-			while (true)
-			{
-				cryptoRandom.NextBytes(buffer);
-
-				result = new BigInteger(buffer) + lower;
-
-				if (result >= lower && result <= upper)
-				{
-					return result;
-				}
-			}
+			return result;
 		}
 
-		private BigInteger FindSmallPrime(int bits)
+		// Do trial division
+		private BigInteger CheckForSmallComposites(int bits)
 		{
 			disposeCheck();
-			if (!(bits <= 20)) { throw new ArgumentException("bits > 20"); }
+			if (!(bits <= 20))
+			{
+				throw new ArgumentException("bits > 20");
+			}
 
-			//Log("{0}FindSmallPrime({1})", GetDepthPadding(), bits);
+			EnterMethod(nameof(CheckForSmallComposites), bits);
 
 			BigInteger result = 0;
-			List<long> primes = null;
+			List<long> lucky = null;
 
 			bool composite = true;
 			while (composite)
@@ -457,17 +320,17 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 				for (int i = 0; i < bits - 1; i++)
 				{
-					n |= (long)cryptoRandom.Next(2) << i;
+					n |= CryptoRandomSingleton.Next(2) << i;
 				}
 
 				long bound = (long)Math.Sqrt(n);
 
-				primes = Sieve(bound);
+				lucky = Sieve(bound);
 				composite = false;
 
-				for (int i = 0; !composite && i < primes.Count; i++)
+				for (int i = 0; !composite && i < lucky.Count; i++)
 				{
-					composite = n % primes[i] == 0;
+					composite = n % lucky[i] == 0;
 				}
 
 				if (!composite)
@@ -476,40 +339,42 @@ namespace AlgorithmLibrary.MaurerPrimes
 				}
 			}
 
+			LeaveMethod();
 			return result;
 		}
 
 		/// <summary>
 		/// Sieve of Eratosthenes. Find all prime numbers less than or equal ceiling
 		/// </summary>
+		/// <param name="ceiling"></param>
 		private List<long> Sieve(long ceiling)
 		{
-			//Log("{0}Sieve()",GetDepthPadding());
 			disposeCheck();
-			long i = 0;
+			LogMethod(nameof(Sieve), ceiling);
+
+			long counter = 0;
 			long inc;
 			long sqrt = 3;
 			bool[] sieve = new bool[ceiling + 1];
 
 			sieve[2] = true;
 
-			for (i = 3; i <= ceiling; i++)
+			for (counter = 3; counter <= ceiling; counter += 2)
 			{
-				if (i % 2 == 1)
+				if (counter % 2 == 1)
 				{
-					sieve[i] = true;
+					sieve[counter] = true;
 				}
 			}
-
 			do
 			{
-				i = sqrt * sqrt;
+				counter = sqrt * sqrt;
 				inc = sqrt + sqrt;
 
-				while (i <= ceiling)
+				while (counter <= ceiling)
 				{
-					sieve[i] = false;
-					i += inc;
+					sieve[counter] = false;
+					counter += inc;
 				}
 
 				sqrt += 2;
@@ -520,7 +385,16 @@ namespace AlgorithmLibrary.MaurerPrimes
 				}
 			} while (sqrt * sqrt <= ceiling);
 
-			return Enumerable.Range(2, (int)ceiling - 2).Select(n => (long)n).Where(l => sieve[l]).ToList();
+
+			List<long> result = Enumerable.Range(2, (int)ceiling - 2).Select(n => (long)n).Where(l => sieve[l]).ToList();
+
+			LeaveMethod();
+			return result;
+		}
+
+		public static double Log2(BigInteger n)
+		{
+			return BigInteger.Log10(n) / Math.Log10(2);
 		}
 	}
 }

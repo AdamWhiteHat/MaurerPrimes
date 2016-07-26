@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MaurerConsole")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("https://code.msdn.microsoft.com/Maurers-Algorithm-for-3422d1b2")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("MaurerConsole")]

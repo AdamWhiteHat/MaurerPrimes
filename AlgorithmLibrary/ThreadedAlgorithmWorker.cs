@@ -12,25 +12,20 @@ namespace AlgorithmLibrary.MaurerPrimes
 {
 	public class ThreadedAlgorithmWorker
 	{
-		public string Log { get; private set; }
 		public TimeSpan RunTime { get; private set; }
-		public event RunWorkerCompletedEventHandler WorkerComplete;
-
+		public event RunWorkerCompletedEventHandler WorkerComplete;		
+		
 		private int bits;
 		private DateTime startTime;
+		private Algorithm algorithm;
 		private BackgroundWorker bgWorker;
 		private CancellationToken cancelToken;
-		private bool isLoggingEnabled;
-		private LoggingMethodType loggingType { get; set; }
 
 		public ThreadedAlgorithmWorker(int bitSize)
 		{
 			bits = bitSize;
 			RunTime = TimeSpan.Zero;
-			isLoggingEnabled = false;
-			loggingType = LoggingMethodType.None;
-
-			Log = "";
+			
 			bgWorker = new BackgroundWorker();
 			bgWorker.DoWork += bgWorker_DoWork;
 			bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
@@ -49,12 +44,6 @@ namespace AlgorithmLibrary.MaurerPrimes
 			bgWorker.RunWorkerAsync(bits);
 		}
 
-		public void SetLoggingBehavior(bool enable, LoggingMethodType loggingMethod)
-		{
-			isLoggingEnabled = enable;
-			loggingType = loggingMethod;
-		}
-
 		private void OnWorkerComplete(object result, Exception error, bool cancelled)
 		{
 			RunWorkerCompletedEventHandler handler = WorkerComplete;
@@ -63,16 +52,14 @@ namespace AlgorithmLibrary.MaurerPrimes
 				RunWorkerCompletedEventArgs args = new RunWorkerCompletedEventArgs(result, error, cancelled);
 				handler(this, args);
 			}
+
 		}
 
 		private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			int argument = (int)e.Argument;
-			Algorithm algorithm = new Algorithm(cancelToken);
-			algorithm.SetLoggingBehavior(isLoggingEnabled, isLoggingEnabled ? loggingType : LoggingMethodType.None);
-			BigInteger result = algorithm.ProvablePrime(argument);
-			Log = algorithm.GetLogData();
-			algorithm.Dispose();
+			algorithm = new Algorithm(cancelToken);
+			BigInteger result = algorithm.ProvablePrime(argument);			
 
 			if (cancelToken.IsCancellationRequested)
 			{
@@ -97,13 +84,11 @@ namespace AlgorithmLibrary.MaurerPrimes
 			}
 			else
 			{
-				if (loggingType == LoggingMethodType.Console)
-				{
-					Console.WriteLine("FINISHED: RunWorkerComplete");
-					Console.WriteLine("---------------------------------------------------------------");
-					Console.WriteLine();
-				}
 				OnWorkerComplete(e.Result, e.Error, e.Cancelled);
+			}
+			if (algorithm != null)
+			{
+				algorithm.Dispose();
 			}
 		}
 
