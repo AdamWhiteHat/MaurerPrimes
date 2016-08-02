@@ -210,56 +210,55 @@ namespace AlgorithmLibrary.MaurerPrimes
 				return true;
 			}
 
-			BigInteger m = hopeful % 2;
+			BigInteger remainder = hopeful % Two;
 
-			if (m == 0)
+			if (remainder == 0)
 			{
 				LeaveMethod();
 				return false;
 			}
 
-			BigInteger n1 = hopeful - 1;
-			BigInteger r = n1;
+			BigInteger hopefulLess1 = hopeful - 1;
+			BigInteger dividend = hopefulLess1;
 
-			m = r % 2;
+			remainder = dividend % Two;
 
-			long s = 0;
-			while (m == 0)
+			long divisionCount = 0;
+			while (remainder == 0)
 			{
-				r = r / 2;
-				m = r % 2;
-				s++;
+				BigInteger.DivRem(dividend, Two, out remainder);
+				divisionCount++;
 			}
 
-			BigInteger n2 = hopeful - 2;
-			BigInteger a = 0;
-			BigInteger y;
+			BigInteger hopefulLess2 = hopeful - Two;
+			BigInteger random = 0;
+			BigInteger residue;
 
-			int i = 1;
-			int j = 1;
-			for (i = 1; i <= accuracy; i++)
+			int testCount = 1;
+			int modCount = 1;
+			for (testCount = 1; testCount <= accuracy; testCount++)
 			{
-				a = CryptoRandomSingleton.RandomRange(2, n2);
-				y = BigInteger.ModPow(a, r, hopeful);
+				random = CryptoRandomSingleton.RandomRange(Two, hopefulLess2);
+				residue = BigInteger.ModPow(random, dividend, hopeful);
 
-				if (y != 1 && y != n1)
+				if (residue != 1 && residue != hopefulLess1)
 				{
-					j = 1;
+					modCount = 1;
 
-					while (j <= s && y != n1)
+					while (modCount <= divisionCount && residue != hopefulLess1)
 					{
-						y = BigInteger.ModPow(y, 2, hopeful);
+						residue = BigInteger.ModPow(residue, 2, hopeful);
 
-						if (y == 1)
+						if (residue == 1)
 						{
 							LeaveMethod();
 							return false;
 						}
 
-						j++;
+						modCount++;
 					}
 
-					if (y != n1)
+					if (residue != hopefulLess1)
 					{
 						LeaveMethod();
 						return false;
@@ -281,9 +280,8 @@ namespace AlgorithmLibrary.MaurerPrimes
 			{
 				modPow = BigInteger.ModPow(witness, 2 * accuracy, probable);
 				BigInteger gcd = BigInteger.GreatestCommonDivisor(modPow - 1, probable);
-				bool success = (gcd == 1);
 
-				if (success)
+				if (gcd == 1)
 				{
 					LogMethod("GetCertificateOfPrimality.RandomRange({0}, {1}) = {2}", Two, (probable - Two), witness);
 

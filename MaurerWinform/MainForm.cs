@@ -173,11 +173,16 @@ namespace MaurerWinform
 		private static readonly string PrimalityTestInstructions = "Please enter the number you wish to factor into the large, bottom-most TextBox.";
 		private void btnPrimalityTest_Click(object sender, EventArgs e)
 		{
-			string input = tbOutput.Text;
-			input = input.Trim()		// Trim all leading and trailing whitespace
-					.Replace(",", "")	// Remove any commas, often used as place-value separators (in USA)
-					.Replace("\r", "")	// Remove any line-feeds or carriage returns in case
-					.Replace("\n", "");	//   pasted from shitty text editor with word wrapping
+			string input = tbOutput.Lines.FirstOrDefault();
+			if (string.IsNullOrWhiteSpace(input))
+			{
+				MessageBox.Show(PrimalityTestInstructions, MessageBoxCaption);
+				return;
+			}
+			input = input.Trim()        // Trim all leading and trailing whitespace
+					.Replace(",", "")   // Remove any commas, often used as place-value separators (in USA)
+					.Replace("\r", "")  // Remove any line-feeds or carriage returns in case
+					.Replace("\n", ""); //   pasted from shitty text editor with word wrapping
 
 			if (input.Any(c => !Numbers.Contains(c))) // Check for non-numerical characters
 			{
@@ -190,7 +195,7 @@ namespace MaurerWinform
 			bool result = alg.MillerRabinPrimalityTest(intTest, 20);
 			TimeSpan timeElapsed = DateTime.Now.Subtract(startTime);
 			alg.Dispose();
-			tbOutput.Text.Insert(0, string.Format("Is prime: {0}{1}Time elapsed: {2}", result.ToString(), Environment.NewLine, ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed)));
+			tbOutput.AppendText(string.Format("{1}Is prime: {0}{1}Time elapsed: {2}", result.ToString(), Environment.NewLine, ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed)));
 		}
 
 		private static readonly string MultiplyInstructions = "Please put the two numbers you wish to multiply onto separate lines in the large, bottom-most TextBox.";
