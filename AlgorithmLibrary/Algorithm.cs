@@ -24,7 +24,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		{
 			disposeCheck();
 			cancelToken = new CancellationToken();
-			
+
 			recursionDepthCount = 0;
 		}
 
@@ -109,7 +109,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 			}
 
 			if (bits <= 20)
-			{				
+			{
 				LogMethod("***MAXIMUM RECURSION DEPT REACHED: {0}", recursionDepthCount);
 				hopeful = CheckForSmallComposites(bits);
 				LogMethod("***Hopeful prime: {0}", hopeful);
@@ -219,14 +219,15 @@ namespace AlgorithmLibrary.MaurerPrimes
 			}
 
 			BigInteger hopefulLess1 = hopeful - 1;
-			BigInteger dividend = hopefulLess1;
+			BigInteger quotient = hopefulLess1;
 
-			remainder = dividend % Two;
+			remainder = quotient % Two;
 
 			long divisionCount = 0;
 			while (remainder == 0)
 			{
-				BigInteger.DivRem(dividend, Two, out remainder);
+				quotient = quotient / Two;
+				remainder = quotient % Two;
 				divisionCount++;
 			}
 
@@ -239,31 +240,33 @@ namespace AlgorithmLibrary.MaurerPrimes
 			for (testCount = 1; testCount <= accuracy; testCount++)
 			{
 				random = CryptoRandomSingleton.RandomRange(Two, hopefulLess2);
-				residue = BigInteger.ModPow(random, dividend, hopeful);
+				residue = BigInteger.ModPow(random, quotient, hopeful);
 
-				if (residue != 1 && residue != hopefulLess1)
+				if (residue == 1 || residue == hopefulLess1)
 				{
-					modCount = 1;
+					continue;
+				}
 
-					while (modCount <= divisionCount && residue != hopefulLess1)
-					{
-						residue = BigInteger.ModPow(residue, 2, hopeful);
+				modCount = 1;
+				while (modCount <= divisionCount && residue != hopefulLess1)
+				{
+					residue = BigInteger.ModPow(residue, 2, hopeful);
 
-						if (residue == 1)
-						{
-							LeaveMethod();
-							return false;
-						}
-
-						modCount++;
-					}
-
-					if (residue != hopefulLess1)
+					if (residue == 1)
 					{
 						LeaveMethod();
 						return false;
 					}
+
+					modCount++;
 				}
+
+				if (residue != hopefulLess1)
+				{
+					LeaveMethod();
+					return false;
+				}
+
 			}
 
 			LeaveMethod();
