@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Drawing;
 using System.Collections.Generic;
 using System.Threading;
 using AlgorithmLibrary;
@@ -52,7 +51,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		{
 			if (IsDisposed)
 			{
-				throw new ObjectDisposedException(nameof(Algorithm));
+				throw new ObjectDisposedException("Algorithm");
 			}
 		}
 
@@ -98,12 +97,12 @@ namespace AlgorithmLibrary.MaurerPrimes
 			BigInteger hopeful = 0;
 
 			Console.Write(".");
-			EnterMethod(nameof(ProvablePrime), bits);
+			EnterMethod("ProvablePrime", bits);
 
 
 			if (cancelToken.IsCancellationRequested)
 			{
-				LogMethod("{0}: CancellationToken.IsCancellationRequested", nameof(ProvablePrime));
+				LogMethod("{0}: CancellationToken.IsCancellationRequested", "ProvablePrime");
 				LeaveMethod();
 				return -1;
 			}
@@ -202,7 +201,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		public bool MillerRabinPrimalityTest(BigInteger hopeful, int accuracy)
 		{
 			disposeCheck();
-			EnterMethod(nameof(MillerRabinPrimalityTest), hopeful, accuracy);
+			EnterMethod("MillerRabinPrimalityTest", hopeful, accuracy);
 
 			if (hopeful == 2 || hopeful == 3)
 			{
@@ -309,7 +308,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 				throw new ArgumentException("bits > 20");
 			}
 
-			EnterMethod(nameof(CheckForSmallComposites), bits);
+			EnterMethod("CheckForSmallComposites", bits);
 
 			BigInteger result = 0;
 			List<long> lucky = null;
@@ -351,7 +350,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		private List<long> Sieve(long ceiling)
 		{
 			disposeCheck();
-			LogMethod(nameof(Sieve), ceiling);
+			LogMethod("Sieve", ceiling);
 
 			long counter = 0;
 			long inc;
