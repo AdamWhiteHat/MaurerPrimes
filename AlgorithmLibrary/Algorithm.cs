@@ -14,6 +14,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 	public class Algorithm : IDisposable
 	{
 		public static readonly BigInteger Two = new BigInteger(2);
+		public bool LoggingEnabled { get; set; }
 		private bool IsDisposed = false;
 		private CancellationToken cancelToken;
 
@@ -61,25 +62,34 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 		private void EnterMethod(string methodName, params object[] args)
 		{
-			LoggerSingleton.Log("{0}{1}({2})", GetDepthPadding(), methodName, string.Join(", ", args.ToString()));
-			LoggerSingleton.Log(GetDepthPadding() + "{");
-			recursionDepthCount++;
+			if (LoggingEnabled)
+			{
+				LoggerSingleton.Log("{0}{1}({2})", GetDepthPadding(), methodName, string.Join(", ", args.ToString()));
+				LoggerSingleton.Log(GetDepthPadding() + "{");
+				recursionDepthCount++;
+			}
 		}
 
 		private void LeaveMethod()
 		{
-			recursionDepthCount--;
-			LoggerSingleton.Log(GetDepthPadding() + "}");
+			if (LoggingEnabled)
+			{
+				recursionDepthCount--;
+				LoggerSingleton.Log(GetDepthPadding() + "}");
+			}
 		}
 
 		private void LogMethod(string message, params object[] args)
 		{
-			LoggerSingleton.Log(GetDepthPadding() + string.Format(message, args));
+			if (LoggingEnabled)
+			{
+				LoggerSingleton.Log(GetDepthPadding() + string.Format(message, args));
+			}
 		}
 
 		private string GetDepthPadding()
 		{
-			if (recursionDepthCount > 0)
+			if (LoggingEnabled && recursionDepthCount > 0)
 			{
 				return new string(Enumerable.Repeat(' ', recursionDepthCount).ToArray());
 			}
@@ -186,7 +196,10 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 							if (cert != null)
 							{
-								LoggerSingleton.Log(cert);
+								if (LoggingEnabled)
+								{
+									LoggerSingleton.Log(cert);
+								}
 								success = true;
 							}
 						}
@@ -287,7 +300,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 				{
 					LogMethod("GetCertificateOfPrimality.RandomRange({0}, {1}) = {2}", Two, (probable - Two), witness);
 
-					Console.Write(".");
+					//Console.Write(".");
 					result = GetDepthPadding() + string.Format("Certificate of primality for: {0}{1}", probable, Environment.NewLine);
 					result += GetDepthPadding() + "{" + Environment.NewLine;
 					result += GetDepthPadding() + string.Format(" {0} ^ {1}-1 mod {1} == 1{2}", witness, probable, Environment.NewLine);

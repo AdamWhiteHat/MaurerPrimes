@@ -12,8 +12,8 @@ namespace MaurerConsole
 	{
 		private static readonly string DashedLine = "---------------------------------------------";
 		internal static void Main()
-		{			
-			//AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+		{
+			//AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;	
 			int counter = 1;
 			int sizeTextPosition = 0;
 			int max = Settings.Quantity;
@@ -160,6 +160,7 @@ namespace MaurerConsole
 			{
 				File.AppendAllText(Settings.File_Output, string.Concat(primeText, Environment.NewLine));
 			}
+			Console.Write("P");
 		}
 	}
 }

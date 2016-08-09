@@ -40,6 +40,7 @@ namespace MaurerConsole
 
 			algorithmWorker = new ThreadedAlgorithmWorker(primeBitSize);
 			algorithmWorker.WorkerComplete += algorithmWorker_WorkerComplete;
+			algorithmWorker.LoggingEnabled = Settings.Logging_Enabled;
 
 			this.RunTime = algorithmWorker.RunTime;
 		}

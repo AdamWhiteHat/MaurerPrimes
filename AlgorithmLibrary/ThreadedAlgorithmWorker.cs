@@ -13,8 +13,9 @@ namespace AlgorithmLibrary.MaurerPrimes
 	public class ThreadedAlgorithmWorker
 	{
 		public TimeSpan RunTime { get; private set; }
-		public event RunWorkerCompletedEventHandler WorkerComplete;		
-		
+		public event RunWorkerCompletedEventHandler WorkerComplete;
+		public bool LoggingEnabled { get; set; }
+
 		private int bits;
 		private DateTime startTime;
 		private Algorithm algorithm;
@@ -59,6 +60,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		{
 			int argument = (int)e.Argument;
 			algorithm = new Algorithm(cancelToken);
+			algorithm.LoggingEnabled = this.LoggingEnabled;
 			BigInteger result = algorithm.ProvablePrime(argument);			
 
 			if (cancelToken.IsCancellationRequested)

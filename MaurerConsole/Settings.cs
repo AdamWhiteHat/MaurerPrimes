@@ -8,5 +8,6 @@ namespace MaurerConsole
 		public static string File_Output = SettingsReader.GetSettingString("File.Output");
 		public static int ThreadSleep_Duration = SettingsReader.GetSetting<int>("ThreadSleep.Duration");
 		public static bool Silent_Mode = SettingsReader.GetSetting<bool>("Silent.Mode");
+		public static bool Logging_Enabled = SettingsReader.GetSetting<bool>("Logging.Enabled");
 	}
 }
