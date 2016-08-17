@@ -30,7 +30,7 @@ namespace MaurerConsole
 		private Queue<BigInteger> primes;
 		private Queue<WorkerResultType> results;
 
-		public ConsoleWorker(int primeBitSize)
+		public ConsoleWorker()
 		{
 			errors = new Queue<Exception>();
 			primes = new Queue<BigInteger>();
@@ -38,11 +38,12 @@ namespace MaurerConsole
 
 			Result = WorkerResultType.None;
 
-			algorithmWorker = new ThreadedAlgorithmWorker(primeBitSize);
-			algorithmWorker.WorkerComplete += algorithmWorker_WorkerComplete;
+			algorithmWorker = new ThreadedAlgorithmWorker(Settings.Search_Depth);
 			algorithmWorker.LoggingEnabled = Settings.Logging_Enabled;
-
-			this.RunTime = algorithmWorker.RunTime;
+			algorithmWorker.DoWorkFunc = algorithmWorker.DoWork_FindPrime;
+			algorithmWorker.WorkerComplete += algorithmWorker_WorkerComplete;
+			
+			this.RunTime = algorithmWorker.RuntimeTimer;
 		}
 
 		public Exception RemoveErrorResult()
@@ -88,7 +89,7 @@ namespace MaurerConsole
 			SetNextResult();
 		}
 
-		public bool StartWorker()
+		public bool StartWorker(int primeBitSize)
 		{
 			if (!IsBusy)
 			{
@@ -104,8 +105,8 @@ namespace MaurerConsole
 					cancelSource = new CancellationTokenSource();
 					cancelToken = cancelSource.Token;
 				}
-				
-				algorithmWorker.StartWorker(cancelToken);
+
+				algorithmWorker.StartWorker(cancelToken, primeBitSize);
 				return true;
 			}
 			return false;
@@ -116,7 +117,7 @@ namespace MaurerConsole
 			if (e.Error != null)
 			{
 				this.errors.Enqueue(e.Error);
-				this.results.Enqueue(WorkerResultType.Error);				
+				this.results.Enqueue(WorkerResultType.Error);
 				SetNextResult();
 			}
 			else if (e.Cancelled)
@@ -126,7 +127,7 @@ namespace MaurerConsole
 			{
 				BigInteger prime = (BigInteger)e.Result;
 
-				this.RunTime = algorithmWorker.RunTime;
+				this.RunTime = algorithmWorker.RuntimeTimer;
 
 				this.primes.Enqueue(prime);
 				this.results.Enqueue(WorkerResultType.Success);				

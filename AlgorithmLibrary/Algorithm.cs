@@ -101,14 +101,20 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 		#endregion
 
-		public BigInteger ProvablePrime(int bits)
+		/// <summary>
+		/// Returns a probable prime of size bits and will search n rounds for a composite
+		/// </summary>
+		/// <param name="bits">Size of prime, in bits</param>
+		/// <param name="compositeSearchRounds">Quantity of rounds to search for composites as evidence of primality</param>
+		/// <returns></returns>
+		public BigInteger ProvablePrime(int bits,int compositeSearchRounds) 
 		{
 			disposeCheck();
 			BigInteger hopeful = 0;
 
 			Console.Write(".");
 			EnterMethod("ProvablePrime", bits);
-
+			
 
 			if (cancelToken.IsCancellationRequested)
 			{
@@ -144,7 +150,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 				int newBits = (int)Math.Floor(r * bits) + 1;
 
-				BigInteger smallPrime = ProvablePrime(newBits);
+				BigInteger smallPrime = ProvablePrime(newBits, compositeSearchRounds);
 
 				if (smallPrime == -1)
 				{
@@ -190,7 +196,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 					if (!done)
 					{
 						//LogMethod("ProvablePrime.RandomRange(J: {0}, K: {1}) = {2}", J, K, rand1);
-						if (MillerRabinPrimalityTest(hopeful, 20))
+						if (MillerRabinPrimalityTest(hopeful, compositeSearchRounds))
 						{
 							string cert = GetCertificateOfPrimality(hopeful, rand1);
 

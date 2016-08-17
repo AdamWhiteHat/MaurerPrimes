@@ -3,6 +3,7 @@ using System.Linq;
 using System.Numerics;
 using System.Threading;
 using System.Collections;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.ComponentModel;
 
@@ -16,16 +17,49 @@ namespace MaurerWinform
 		public bool IsBusy { get { return _isBusy; } private set { _isBusy = value; } }
 		private volatile bool _isBusy = false;
 
-		private int bitSize;
-		private CancellationToken cancelToken;
+		public int SearchDepth { get { return int.TryParse(CleanupString(tbSearchDepth.Text), out _searchDepth) ? _searchDepth : DefaultSearchDepth; } }
+		private int _searchDepth = 0;
+
+		//private CancellationToken cancelToken;
 		private CancellationTokenSource cancelSource;
 		private ThreadedAlgorithmWorker algorithmWorker;
+
+		private static readonly int DefaultSearchDepth = 5;
+		private static readonly string Numbers = "1023456789";
+		private static readonly string MessageBoxCaption = "Oops!";
+		private static readonly string PrimalityTestInstructions = Environment.NewLine + "Please enter the number you wish to factor into the input TextBox.";
+		private static readonly string MultiplyInstructions = Environment.NewLine + "Please put the two numbers you wish to multiply onto separate lines into the input TextBox.";
+		private static readonly string TrialDivisionInstructions = Environment.NewLine + "Please put the number you wish to divide into the input TextBox.";
 
 		public MainForm()
 		{
 			InitializeComponent();
-			tbNumberOfBits.Text = "512";
-			bitSize = 0;
+			tbInput.Text = "512";
+			tbSearchDepth.Text = DefaultSearchDepth.ToString();
+		}
+
+		public void WriteOutputLine(string message, bool atBegining = false)
+		{
+			if (tbOutput.InvokeRequired)
+			{
+				tbOutput.Invoke(new MethodInvoker(() => { WriteOutputLine(message); }));
+			}
+			else
+			{
+				string text = Environment.NewLine;
+				if (!string.IsNullOrWhiteSpace(message))
+				{
+					text = string.Concat(message, Environment.NewLine);
+				}
+				if (atBegining)
+				{
+					tbOutput.Text = tbOutput.Text.Insert(0, text);
+				}
+				else
+				{
+					tbOutput.AppendText(text);
+				}
+			}
 		}
 
 		private void btnSearch_Click(object sender, EventArgs e)
@@ -41,36 +75,41 @@ namespace MaurerWinform
 				IsBusy = true;
 				SetButtonText(false);
 
+				string input = CleanupString(tbInput.Text);
+
 				int bits = 0;
-				if (!int.TryParse(tbNumberOfBits.Text, out bits))
+				if (!int.TryParse(input, out bits))
 				{
-					displayErrorMessage("Error parsing number of bits: Try entering only numeric characters into the upper-most TextBox.");
+					DisplayErrorMessage("Error parsing number of bits: Try entering only numeric characters into the input TextBox.");
 				}
 				else if (bits < 7)
 				{
-					displayErrorMessage("If you need to find prime numbers smaller than seven 7 bits, use a non-specialized calculator.");
+					DisplayErrorMessage("If you need to find prime numbers smaller than seven 7 bits, use a non-specialized calculator.");
 				}
 				else
 				{
-					bitSize = bits;
+					algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth);
+					algorithmWorker.DoWorkFunc = algorithmWorker.DoWork_FindPrime;
+					algorithmWorker.WorkerComplete += FindPrimes_WorkerComplete;
 
-					algorithmWorker = new ThreadedAlgorithmWorker(bitSize);
-					algorithmWorker.WorkerComplete += algorithmWorker_WorkerComplete;
+					ResetCancellationTokenSource();
 
-					if (cancelSource != null)
-					{
-						cancelSource.Dispose();
-						cancelSource = null;
-					}
-
-					if (cancelSource == null)
-					{
-						cancelSource = new CancellationTokenSource();
-						cancelToken = cancelSource.Token;
-					}
-
-					algorithmWorker.StartWorker(cancelToken);
+					algorithmWorker.StartWorker(cancelSource.Token, bits);
 				}
+			}
+		}
+			
+		private void ResetCancellationTokenSource()
+		{
+			if (cancelSource != null)
+			{
+				cancelSource.Dispose();
+				cancelSource = null;
+			}
+
+			if (cancelSource == null)
+			{
+				cancelSource = new CancellationTokenSource();
 			}
 		}
 
@@ -79,16 +118,16 @@ namespace MaurerWinform
 			cancelSource.Cancel();
 		}
 
-		private void displayErrorMessage(string message)
+		private void DisplayErrorMessage(string message, string caption = "")
 		{
-			MessageBox.Show(message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+			MessageBox.Show(message, string.IsNullOrWhiteSpace(caption) ? MessageBoxCaption : caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 		}
 
-		private void SetButtonText(bool enable)
+		private void SetButtonText(bool enable, string resetText = "")
 		{
 			if (enable)
 			{
-				btnSearch.Text = "Search for primes...";
+				btnSearch.Text = resetText;
 			}
 			else
 			{
@@ -96,15 +135,15 @@ namespace MaurerWinform
 			}
 		}
 
-		void algorithmWorker_WorkerComplete(object sender, RunWorkerCompletedEventArgs e)
+		private void FindPrimes_WorkerComplete(object sender, RunWorkerCompletedEventArgs e)
 		{
 			if (e.Error != null)
 			{
-				MessageBox.Show(e.Error.ToString(), "Exception Message", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				DisplayErrorMessage(e.Error.ToString(), "Exception Message");
 			}
 			else if (e.Cancelled)
 			{
-				tbOutput.Text.Insert(0, string.Concat("Task was canceled.", Environment.NewLine));
+				WriteOutputLine("Task was canceled.", true);
 			}
 			else
 			{
@@ -128,23 +167,24 @@ namespace MaurerWinform
 					);
 				//string bitCountString1 = bitString1.Length.ToString();
 				TimeSpan bitStringTime1 = DateTime.Now.Subtract(bitStringStart1);
-				tbOutput.AppendText(Environment.NewLine);
+				WriteOutputLine("");
 
 				//.... PRINT
-				tbOutput.AppendText(string.Format("{1} bit prime ({2} digits):{0}", Environment.NewLine, base2size, base10size));
-				tbOutput.AppendText(string.Format("{1}{0}{0}", Environment.NewLine, primeNumber));
-				//tbOutput.AppendText(string.Format("Bits ({1}):{0}{2}{0}{0}", Environment.NewLine, log2prime, bitString1));
+				WriteOutputLine(string.Format("{0} bit prime ({1} digits):", base2size, base10size));
+				WriteOutputLine(primeNumber);
+				//WriteOutputLine(string.Format("Bits ({0}):", log2prime));
+				//WriteOutputLine(bitString1+Environment.NewLine);
 
 				//... Print run/processing time 
-				if (algorithmWorker.RunTime != null && algorithmWorker.RunTime != TimeSpan.Zero)
+				if (algorithmWorker.RuntimeTimer != null && algorithmWorker.RuntimeTimer != TimeSpan.Zero)
 				{
-					tbOutput.AppendText(string.Format("Run time: {1}{0}", Environment.NewLine, ThreadedAlgorithmWorker.FormatTimeSpan(algorithmWorker.RunTime)));
-					tbOutput.AppendText(string.Format("Time to render: {1}{0}", Environment.NewLine, ThreadedAlgorithmWorker.FormatTimeSpan(bitStringTime1)));
+					WriteOutputLine(string.Format("Run time: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(algorithmWorker.RuntimeTimer)));
+					WriteOutputLine(string.Format("Time to render: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(bitStringTime1)));
 				}
 			}
 
 			IsBusy = false;
-			SetButtonText(true);
+			SetButtonText(true, "Search for primes...");
 		}
 
 		private void tbOutput_KeyUp(object sender, KeyEventArgs e)
@@ -168,25 +208,35 @@ namespace MaurerWinform
 			}
 		}
 
-		private static readonly string Numbers = "1023456789";
-		private static readonly string MessageBoxCaption = "Oops!";
-		private static readonly string PrimalityTestInstructions = "Please enter the number you wish to factor into the large, bottom-most TextBox.";
+		private string CleanupString(string input, bool removeNewlines = true)
+		{
+			string result = input ?? "";
+			if (!string.IsNullOrEmpty(result))
+			{
+				result = result.Trim();        // Trim all leading and trailing whitespace
+				result = result.Replace(",", "");   // Remove any commas, often used as place-value separators (in USA)
+				if (removeNewlines)
+				{
+					result = result.Replace("\r", "");  // Remove any line-feeds or carriage returns in case
+					result = result.Replace("\n", ""); //   pasted from shitty text editor with word wrapping
+				}
+			}
+			return result;
+		}
+
 		private void btnPrimalityTest_Click(object sender, EventArgs e)
 		{
-			string input = tbOutput.Lines.FirstOrDefault();
-			if (string.IsNullOrWhiteSpace(input))
+			string input = tbInput.Lines.FirstOrDefault();
+			input = CleanupString(input);
+			if (string.IsNullOrEmpty(input))
 			{
-				MessageBox.Show(PrimalityTestInstructions, MessageBoxCaption);
+				DisplayErrorMessage(PrimalityTestInstructions);
 				return;
 			}
-			input = input.Trim()        // Trim all leading and trailing whitespace
-					.Replace(",", "")   // Remove any commas, often used as place-value separators (in USA)
-					.Replace("\r", "")  // Remove any line-feeds or carriage returns in case
-					.Replace("\n", ""); //   pasted from shitty text editor with word wrapping
 
 			if (input.Any(c => !Numbers.Contains(c))) // Check for non-numerical characters
 			{
-				MessageBox.Show("Non-numeric characters detected in the input! " + PrimalityTestInstructions, MessageBoxCaption);
+				DisplayErrorMessage("Non-numeric characters detected in the input! " + PrimalityTestInstructions);
 				return;
 			}
 			BigInteger intTest = BigInteger.Parse(input);
@@ -195,32 +245,34 @@ namespace MaurerWinform
 			bool result = alg.MillerRabinPrimalityTest(intTest, 20);
 			TimeSpan timeElapsed = DateTime.Now.Subtract(startTime);
 			alg.Dispose();
-			tbOutput.AppendText(string.Format("{1}Is prime: {0}{1}Time elapsed: {2}", result.ToString(), Environment.NewLine, ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed)));
+			WriteOutputLine("");
+			WriteOutputLine(string.Format("Is prime: {0}", result.ToString()));
+			WriteOutputLine(string.Format("Time elapsed: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed)));
 		}
 
-		private static readonly string MultiplyInstructions = "Please put the two numbers you wish to multiply onto separate lines in the large, bottom-most TextBox.";
 		private void btnMultiply_Click(object sender, EventArgs e)
 		{
-			if (string.IsNullOrWhiteSpace(tbOutput.Text))
+			tbInput.Text = CleanupString(tbInput.Text, false);
+			if (string.IsNullOrWhiteSpace(tbInput.Text))
 			{
-				MessageBox.Show("Input empty! " + MultiplyInstructions, MessageBoxCaption);
+				DisplayErrorMessage("Input empty! " + MultiplyInstructions);
 			}
-			else if (tbOutput.Text.All(c => !Numbers.Contains(c)))
+			else if (tbInput.Text.All(c => !Numbers.Contains(c)))
 			{
-				MessageBox.Show("No numeric input detected! " + MultiplyInstructions, MessageBoxCaption);
+				DisplayErrorMessage("No numeric input detected! " + MultiplyInstructions);
 			}
-			else if (tbOutput.Lines.Length != 2)
+			else if (tbInput.Lines.Length != 2)
 			{
-				MessageBox.Show("Only one input line detected! " + MultiplyInstructions, MessageBoxCaption);
+				DisplayErrorMessage("Only one input line detected! " + MultiplyInstructions);
 			}
 			else
 			{
-				string num1 = tbOutput.Lines[0].Trim();
-				string num2 = tbOutput.Lines[1].Trim();
+				string num1 = tbInput.Lines[0].Trim();
+				string num2 = tbInput.Lines[1].Trim();
 
 				if (num1.Any(c => !Numbers.Contains(c)) || num2.Any(c => !Numbers.Contains(c)))
 				{
-					MessageBox.Show("Non-numeric characters detected in the input! " + MultiplyInstructions, MessageBoxCaption);
+					DisplayErrorMessage("Non-numeric characters detected in the input! " + MultiplyInstructions);
 					return;
 				}
 
@@ -229,10 +281,9 @@ namespace MaurerWinform
 
 				BigInteger result = BigInteger.Multiply(bigInt1, bigInt2);
 
-				tbOutput.Text.Insert(0, string.Format("=\n{0}{1}", result.ToString(), Environment.NewLine));
+				WriteOutputLine(string.Format("=\n{0}", result.ToString()), true);
 			}
 		}
-
 
 	}
 }

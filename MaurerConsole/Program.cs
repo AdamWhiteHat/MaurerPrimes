@@ -20,7 +20,7 @@ namespace MaurerConsole
 			int primeBitSize = Settings.Prime_BitSize;
 			
 			Console.CursorVisible = false;
-			ConsoleWorker worker = new ConsoleWorker(primeBitSize);
+			ConsoleWorker worker = new ConsoleWorker();
 			Console.ForegroundColor = ConsoleColor.White;
 
 			Console.WriteLine("Maurer Prime Finding Algorithm (Console)");
@@ -42,7 +42,7 @@ namespace MaurerConsole
 					Console.WriteLine();
 					Console.Write(" [");
 				}
-				if (!worker.StartWorker())
+				if (!worker.StartWorker(primeBitSize))
 				{
 					break;
 				}
@@ -84,7 +84,7 @@ namespace MaurerConsole
 				else if (worker.Result == WorkerResultType.Success)
 				{
 					BigInteger prime = worker.RemoveSuccessResult();
-					LogPrime(prime, worker.RunTime, sizeTextPosition);
+					LogPrime(prime, worker.RunTime, sizeTextPosition, counter);
 				}
 
 				counter++;
@@ -110,7 +110,7 @@ namespace MaurerConsole
 				else if (worker.Result == WorkerResultType.Success)
 				{
 					BigInteger prime = worker.RemoveSuccessResult();
-					LogPrime(prime, worker.RunTime, sizeTextPosition);
+					LogPrime(prime, worker.RunTime, sizeTextPosition, counter);
 				}
 			}
 
@@ -134,7 +134,7 @@ namespace MaurerConsole
 			Console.ForegroundColor = ConsoleColor.White;
 		}
 
-		private static void LogPrime(BigInteger prime, TimeSpan timeElapsed, int cursorTopPosition)
+		private static void LogPrime(BigInteger prime, TimeSpan timeElapsed, int cursorTopPosition, int count)
 		{
 			string primeText = prime.ToString();
 
@@ -160,7 +160,7 @@ namespace MaurerConsole
 			{
 				File.AppendAllText(Settings.File_Output, string.Concat(primeText, Environment.NewLine));
 			}
-			Console.Write("P");
+			Console.Write(string.Format("({0})",count.ToString()));
 		}
 	}
 }

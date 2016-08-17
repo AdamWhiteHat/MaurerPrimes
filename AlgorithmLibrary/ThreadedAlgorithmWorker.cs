@@ -11,38 +11,42 @@ using System.Threading.Tasks;
 namespace AlgorithmLibrary.MaurerPrimes
 {
 	public class ThreadedAlgorithmWorker
-	{
-		public TimeSpan RunTime { get; private set; }
-		public event RunWorkerCompletedEventHandler WorkerComplete;
+	{		
 		public bool LoggingEnabled { get; set; }
+		public object Argument { get; private set; }
+		public BigInteger Result { get; private set; }
+		public TimeSpan RuntimeTimer { get; private set; }
+		public Func<CancellationToken, object, BigInteger> DoWorkFunc;
+		public event RunWorkerCompletedEventHandler WorkerComplete;
+		public int CompositeSearchDepth { get; set; } = 4;
 
-		private int bits;
+		
 		private DateTime startTime;
 		private Algorithm algorithm;
 		private BackgroundWorker bgWorker;
 		private CancellationToken cancelToken;
 
-		public ThreadedAlgorithmWorker(int bitSize)
+		public ThreadedAlgorithmWorker(int compositeSearchDepth)
 		{
-			bits = bitSize;
-			RunTime = TimeSpan.Zero;
-			
+			RuntimeTimer = TimeSpan.Zero;
+			CompositeSearchDepth = compositeSearchDepth;
 			bgWorker = new BackgroundWorker();
 			bgWorker.DoWork += bgWorker_DoWork;
 			bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
 			bgWorker.WorkerSupportsCancellation = true;
 		}
 
-		public void StartWorker(CancellationToken cancellationToken)
+		public void StartWorker(CancellationToken cancellationToken, object argument)
 		{
 			if (cancellationToken != null)
 			{
 				cancelToken = cancellationToken;
 			}
+			Argument = argument;
 
 			startTime = new DateTime();
 			startTime = DateTime.Now;
-			bgWorker.RunWorkerAsync(bits);
+			bgWorker.RunWorkerAsync(Argument);
 		}
 
 		private void OnWorkerComplete(object result, Exception error, bool cancelled)
@@ -53,15 +57,18 @@ namespace AlgorithmLibrary.MaurerPrimes
 				RunWorkerCompletedEventArgs args = new RunWorkerCompletedEventArgs(result, error, cancelled);
 				handler(this, args);
 			}
+		}
 
+		public BigInteger DoWork_FindPrime(CancellationToken token, object argument)
+		{
+			algorithm = new Algorithm(token);
+			algorithm.LoggingEnabled = this.LoggingEnabled;
+			return algorithm.ProvablePrime((int)argument, CompositeSearchDepth);
 		}
 
 		private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
-			int argument = (int)e.Argument;
-			algorithm = new Algorithm(cancelToken);
-			algorithm.LoggingEnabled = this.LoggingEnabled;
-			BigInteger result = algorithm.ProvablePrime(argument);			
+			Result = DoWorkFunc.Invoke(cancelToken, e.Argument);
 
 			if (cancelToken.IsCancellationRequested)
 			{
@@ -69,7 +76,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 			}
 			else
 			{
-				e.Result = result;
+				e.Result = Result;
 			}
 		}
 
@@ -77,7 +84,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 		{
 			if (startTime != DateTime.MinValue)
 			{
-				RunTime = DateTime.Now.Subtract(startTime);
+				RuntimeTimer = DateTime.Now.Subtract(startTime);
 			}
 
 			if (cancelToken.IsCancellationRequested)
@@ -101,7 +108,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 				return "0.0";
 			}
 
-			StringBuilder result = new StringBuilder();			
+			StringBuilder result = new StringBuilder();
 			if (timeSpan.Days > 0) result.Append(timeSpan.Days.ToString().PadLeft(2)).Append("d ");
 			if (timeSpan.Hours > 0) result.Append(timeSpan.Hours.ToString().PadLeft(2)).Append("h ");
 			if (timeSpan.Minutes > 0) result.Append(timeSpan.Minutes.ToString().PadLeft(2)).Append("m ");
@@ -114,7 +121,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 				}
 				result.Append("s");
 			}
-			
+
 			if (timeSpan.TotalMilliseconds < 1000) result.Append(timeSpan.Milliseconds.ToString().PadLeft(3)).Append("ms");
 			return result.ToString();
 		}
