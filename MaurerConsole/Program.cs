@@ -3,8 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
-
-using AlgorithmLibrary.MaurerPrimes;
+using AlgorithmLibrary;
 
 namespace MaurerConsole
 {

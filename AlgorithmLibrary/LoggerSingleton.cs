@@ -1,6 +1,7 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
-namespace AlgorithmLibrary.MaurerPrimes
+namespace AlgorithmLibrary
 {
 	public static class LoggerSingleton
 	{
@@ -9,7 +10,7 @@ namespace AlgorithmLibrary.MaurerPrimes
 
 		public static void Log(string message)
 		{			
-			File.AppendAllText(_filename, message);
+			File.AppendAllText(_filename, message + Environment.NewLine);
 		}
 
 		public static void Log(string format, params object[] args)

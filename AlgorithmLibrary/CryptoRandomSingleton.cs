@@ -9,7 +9,7 @@ using System;
 using System.Numerics;
 using System.Security.Cryptography;
 
-namespace AlgorithmLibrary.MaurerPrimes
+namespace AlgorithmLibrary
 {
 	public static class CryptoRandomSingleton
 	{

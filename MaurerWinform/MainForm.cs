@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
@@ -6,9 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.ComponentModel;
-
-using AlgorithmLibrary.MaurerPrimes;
-using System.IO;
+using AlgorithmLibrary;
 
 namespace MaurerWinform
 {
@@ -242,7 +241,7 @@ namespace MaurerWinform
 			BigInteger intTest = BigInteger.Parse(input);
 			Algorithm alg = new Algorithm();
 			DateTime startTime = DateTime.Now;
-			bool result = alg.MillerRabinPrimalityTest(intTest, 20);
+			bool result = MillerRabin.CompositeTest(intTest, 20);
 			TimeSpan timeElapsed = DateTime.Now.Subtract(startTime);
 			alg.Dispose();
 			WriteOutputLine("");

@@ -2,8 +2,7 @@
 using System.Numerics;
 using System.Threading;
 using System.Collections.Generic;
-
-using AlgorithmLibrary.MaurerPrimes;
+using AlgorithmLibrary;
 
 namespace MaurerConsole
 {

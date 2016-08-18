@@ -7,8 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-
-namespace AlgorithmLibrary.MaurerPrimes
+namespace AlgorithmLibrary
 {
 	public class ThreadedAlgorithmWorker
 	{		
