@@ -19,7 +19,7 @@ namespace MaurerConsole
 			int primeBitSize = Settings.Prime_BitSize;
 			
 			Console.CursorVisible = false;
-			ConsoleWorker worker = new ConsoleWorker();
+			ConsoleWorker worker = new ConsoleWorker(Settings.Logging_Enabled);
 			Console.ForegroundColor = ConsoleColor.White;
 
 			Console.WriteLine("Maurer Prime Finding Algorithm (Console)");
@@ -29,7 +29,7 @@ namespace MaurerConsole
 
 			while (counter <= max)
 			{
-				if (!Settings.Silent_Mode)
+				if (Settings.Verbose_Mode)
 				{
 					Console.WriteLine(DashedLine);
 					Console.WriteLine("({0} of {1})", counter, max);
@@ -137,7 +137,7 @@ namespace MaurerConsole
 		{
 			string primeText = prime.ToString();
 
-			if (!Settings.Silent_Mode)
+			if (Settings.Verbose_Mode)
 			{
 				string log10prime = (Math.Round(BigInteger.Log10(prime))).ToString("F0");
 				string log2prime = (Math.Round(Algorithm.Log2(prime))).ToString("F0");

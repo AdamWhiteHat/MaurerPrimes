@@ -12,10 +12,11 @@ namespace AlgorithmLibrary
 
 		public static bool CompositeTest(BigInteger hopeful, int accuracy)
 		{
-			LoggerSingleton.Log(string.Format("MillerRabinPrimalityTest({0}, {1});", hopeful, accuracy));
+			Log.MethodEnter("MillerRabinPrimalityTest", hopeful, accuracy);
 
 			if (hopeful == 2 || hopeful == 3)
 			{
+				Log.MethodLeave();
 				return true;
 			}
 
@@ -23,6 +24,7 @@ namespace AlgorithmLibrary
 
 			if (remainder == 0)
 			{
+				Log.MethodLeave();
 				return false;
 			}
 
@@ -62,6 +64,7 @@ namespace AlgorithmLibrary
 
 					if (residue == 1)
 					{
+						Log.MethodLeave();
 						return false;
 					}
 
@@ -70,11 +73,13 @@ namespace AlgorithmLibrary
 
 				if (residue != hopefulLess1)
 				{
+					Log.MethodLeave();
 					return false;
 				}
 
 			}
 
+			Log.MethodLeave();
 			return true;
 		}
 

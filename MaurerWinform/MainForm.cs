@@ -239,11 +239,9 @@ namespace MaurerWinform
 				return;
 			}
 			BigInteger intTest = BigInteger.Parse(input);
-			Algorithm alg = new Algorithm();
 			DateTime startTime = DateTime.Now;
-			bool result = MillerRabin.CompositeTest(intTest, 20);
+			bool result = MillerRabin.CompositeTest(intTest, SearchDepth);
 			TimeSpan timeElapsed = DateTime.Now.Subtract(startTime);
-			alg.Dispose();
 			WriteOutputLine("");
 			WriteOutputLine(string.Format("Is prime: {0}", result.ToString()));
 			WriteOutputLine(string.Format("Time elapsed: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed)));

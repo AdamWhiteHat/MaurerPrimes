@@ -12,25 +12,21 @@ namespace AlgorithmLibrary
 	public class Algorithm : IDisposable
 	{
 		public static readonly BigInteger Two = new BigInteger(2);
-		public bool LoggingEnabled { get; set; }
+
 		private bool IsDisposed = false;
 		private CancellationToken cancelToken;
 
-		private int recursionDepthCount;
-
-		public Algorithm()
+		public Algorithm(CancellationToken cancellationToken, bool loggingEnabled = false)
 		{
 			disposeCheck();
 			cancelToken = new CancellationToken();
-			recursionDepthCount = 0;			
-		}
-
-		public Algorithm(CancellationToken cancellationToken)
-			: this()
-		{
 			if (cancellationToken != null)
 			{
 				cancelToken = cancellationToken;
+			}
+			if (loggingEnabled)
+			{
+				Log.SetLoggingPreference(true);
 			}
 		}
 
@@ -55,76 +51,33 @@ namespace AlgorithmLibrary
 
 		#endregion
 
-		#region Logging Members
-
-		private void EnterMethod(string methodName, params object[] args)
-		{
-			if (LoggingEnabled)
-			{
-				LoggerSingleton.Log(GetDepthPadding() + "{0}({1})", methodName, string.Join(", ", args));
-				LoggerSingleton.Log(GetDepthPadding() + "{");
-				recursionDepthCount++;
-			}
-		}
-
-		private void LeaveMethod()
-		{
-			if (LoggingEnabled)
-			{
-				recursionDepthCount--;
-				LoggerSingleton.Log(GetDepthPadding() + "}");
-			}
-		}
-
-		private void LogMethod(string message, params object[] args)
-		{
-			if (LoggingEnabled)
-			{
-				LoggerSingleton.Log(GetDepthPadding() + string.Format(message, args));
-			}
-		}
-
-		private string GetDepthPadding()
-		{
-			if (LoggingEnabled && recursionDepthCount > 0)
-			{
-				return new string(Enumerable.Repeat('\t', recursionDepthCount).ToArray());
-			}
-			else
-			{
-				return "";
-			}
-		}
-
-		#endregion
-
 		/// <summary>
 		/// Returns a probable prime of size bits and will search n rounds for a composite
 		/// </summary>
 		/// <param name="bits">Size of prime, in bits</param>
 		/// <param name="compositeSearchRounds">Quantity of rounds to search for composites as evidence of primality</param>
 		/// <returns></returns>
-		public BigInteger ProvablePrime(int bits,int compositeSearchRounds) 
+		public BigInteger ProvablePrime(int bits, int compositeSearchRounds)
 		{
 			disposeCheck();
 			BigInteger hopeful = 0;
 
 			Console.Write(".");
-			EnterMethod("ProvablePrime", bits);
-			
+			Log.MethodEnter("ProvablePrime", bits);
+
 
 			if (cancelToken.IsCancellationRequested)
 			{
-				LogMethod("ProvablePrime.CancellationToken.IsCancellationRequested();");
-				LeaveMethod();
+				Log.Message("ProvablePrime.CancellationToken.IsCancellationRequested();");
+				Log.MethodLeave();
 				return -1;
 			}
 
 			if (bits <= 20)
 			{
-				LogMethod("***MAXIMUM RECURSION DEPT REACHED: {0}", recursionDepthCount);
+				Log.Message("***MAXIMUM RECURSION DEPT REACHED");
 				hopeful = TrialDivision.CheckForSmallComposites(bits);
-				LogMethod("***Hopeful prime: {0}", hopeful);
+				Log.Message("***Hopeful prime: {0}", hopeful);
 			}
 			else
 			{
@@ -151,10 +104,10 @@ namespace AlgorithmLibrary
 
 				if (smallPrime == -1)
 				{
-					LeaveMethod();
+					Log.MethodLeave();
 					return -1;
 				}
-				LogMethod("After Recursion: Length = {0}", smallPrime.ToString().Length);
+				Log.Message("After Recursion: Length = {0}", smallPrime.ToString().Length);
 
 				BigInteger pow = BigInteger.Pow(Two, bits - 1);
 				BigInteger Q = Two * smallPrime;
@@ -168,8 +121,8 @@ namespace AlgorithmLibrary
 				{
 					if (cancelToken.IsCancellationRequested)
 					{
-						LogMethod("ProvablePrime.CancellationToken.IsCancellationRequested();");
-						LeaveMethod();
+						Log.Message("ProvablePrime.CancellationToken.IsCancellationRequested();");
+						Log.MethodLeave();
 						return -1;
 					}
 
@@ -195,25 +148,23 @@ namespace AlgorithmLibrary
 						//LogMethod("ProvablePrime.RandomRange(J: {0}, K: {1}) = {2}", J, K, rand1);
 						if (MillerRabin.CompositeTest(hopeful, compositeSearchRounds))
 						{
+							success = true;
 							string cert = MillerRabin.GetCertificateOfPrimality(hopeful, rand1);
 
 							if (cert != null)
 							{
-								if (LoggingEnabled)
-								{
-									LoggerSingleton.Log(Environment.NewLine + cert + Environment.NewLine);
-								}
-								success = true;
+								Log.Message(cert);
 							}
 						}
 					}
 				}
 			}
 
-			LeaveMethod();
+			Console.Write(".");
+			Log.MethodLeave();
 			return hopeful;
-		}		
-		
+		}
+
 		public static double Log2(BigInteger n)
 		{
 			return BigInteger.Log10(n) / Math.Log10(2);

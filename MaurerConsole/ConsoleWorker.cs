@@ -29,7 +29,7 @@ namespace MaurerConsole
 		private Queue<BigInteger> primes;
 		private Queue<WorkerResultType> results;
 
-		public ConsoleWorker()
+		public ConsoleWorker(bool loggingEnabled)
 		{
 			errors = new Queue<Exception>();
 			primes = new Queue<BigInteger>();
@@ -37,8 +37,7 @@ namespace MaurerConsole
 
 			Result = WorkerResultType.None;
 
-			algorithmWorker = new ThreadedAlgorithmWorker(Settings.Search_Depth);
-			algorithmWorker.LoggingEnabled = Settings.Logging_Enabled;
+			algorithmWorker = new ThreadedAlgorithmWorker(Settings.Search_Depth, loggingEnabled);
 			algorithmWorker.DoWorkFunc = algorithmWorker.DoWork_FindPrime;
 			algorithmWorker.WorkerComplete += algorithmWorker_WorkerComplete;
 			

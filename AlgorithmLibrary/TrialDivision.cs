@@ -13,7 +13,7 @@ namespace AlgorithmLibrary
 				throw new ArgumentException("bits > 20");
 			}
 
-			LoggerSingleton.Log("CheckForSmallComposites("+bits+");");
+			Log.MethodEnter("TrialDivision.CheckForSmallComposites", bits);
 
 			BigInteger result = 0;
 			List<long> lucky = null;
@@ -43,7 +43,8 @@ namespace AlgorithmLibrary
 					result = n;
 				}
 			}
-			
+
+			Log.MethodLeave();
 			return result;
 		}
 	}

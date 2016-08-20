@@ -20,7 +20,7 @@ namespace AlgorithmLibrary
 		/// </summary>
 		public static List<long> Sieve(long ceiling)
 		{
-			LoggerSingleton.Log("Sieve("+ceiling+");");
+			Log.MethodEnter("Eratosthenes.Sieve", ceiling);
 
 			long cacheMaxValue = 0;
 			if (longestSieve.Count > 0)
@@ -30,7 +30,8 @@ namespace AlgorithmLibrary
 
 			if (cacheMaxValue >= ceiling || longestprimeMembershipArray.Count >= ceiling)
 			{
-				LoggerSingleton.Log("Primes = [(Cached Value)];");
+				Log.Message("Primes = [(Cached Value)];");
+				Log.MethodLeave();
 				return longestSieve.TakeWhile(l => l < ceiling).ToList();
 			}
 
@@ -86,7 +87,8 @@ namespace AlgorithmLibrary
 				longestprimeMembershipArray = primeMembershipArray.ToList();
 			}
 
-			LoggerSingleton.Log("Primes = [" + string.Join(",", result) + "];");
+			Log.Message("Primes = [Len:{0}];", result.Count);
+			Log.MethodLeave();
 			return result;
 		}
 	}

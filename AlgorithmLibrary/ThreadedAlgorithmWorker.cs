@@ -11,7 +11,7 @@ namespace AlgorithmLibrary
 {
 	public class ThreadedAlgorithmWorker
 	{		
-		public bool LoggingEnabled { get; set; }
+		
 		public object Argument { get; private set; }
 		public BigInteger Result { get; private set; }
 		public TimeSpan RuntimeTimer { get; private set; }
@@ -24,8 +24,9 @@ namespace AlgorithmLibrary
 		private Algorithm algorithm;
 		private BackgroundWorker bgWorker;
 		private CancellationToken cancelToken;
+		private bool LoggingEnabled;
 
-		public ThreadedAlgorithmWorker(int compositeSearchDepth)
+		public ThreadedAlgorithmWorker(int compositeSearchDepth, bool loggingEnabled = false)
 		{
 			RuntimeTimer = TimeSpan.Zero;
 			CompositeSearchDepth = compositeSearchDepth;
@@ -33,6 +34,7 @@ namespace AlgorithmLibrary
 			bgWorker.DoWork += bgWorker_DoWork;
 			bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
 			bgWorker.WorkerSupportsCancellation = true;
+			this.LoggingEnabled = loggingEnabled;
 		}
 
 		public void StartWorker(CancellationToken cancellationToken, object argument)
@@ -60,8 +62,7 @@ namespace AlgorithmLibrary
 
 		public BigInteger DoWork_FindPrime(CancellationToken token, object argument)
 		{
-			algorithm = new Algorithm(token);
-			algorithm.LoggingEnabled = this.LoggingEnabled;
+			algorithm = new Algorithm(token, LoggingEnabled);
 			return algorithm.ProvablePrime((int)argument, CompositeSearchDepth);
 		}
 
