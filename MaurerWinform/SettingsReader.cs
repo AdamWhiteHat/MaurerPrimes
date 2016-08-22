@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Configuration;
 
-namespace MaurerConsole
+namespace MaurerWinform
 {
 	public static class SettingsReader
-	{		
+	{
 		public static T GetSetting<T>(string SettingName)
 		{
 			try

@@ -35,6 +35,7 @@ namespace MaurerWinform
 			InitializeComponent();
 			tbInput.Text = "512";
 			tbSearchDepth.Text = DefaultSearchDepth.ToString();
+			AlgorithmLibrary.Log.SetLoggingPreference(Settings.Logging_Enabled);
 		}
 
 		public void WriteOutputLine(string message, bool atBegining = false)
@@ -87,7 +88,7 @@ namespace MaurerWinform
 				}
 				else
 				{
-					algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth);
+					algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth, Settings.Logging_Enabled);
 					algorithmWorker.DoWorkFunc = algorithmWorker.DoWork_FindPrime;
 					algorithmWorker.WorkerComplete += FindPrimes_WorkerComplete;
 
