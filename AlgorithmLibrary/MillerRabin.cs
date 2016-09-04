@@ -76,7 +76,6 @@ namespace AlgorithmLibrary
 					Log.MethodLeave();
 					return false;
 				}
-
 			}
 
 			Log.MethodLeave();

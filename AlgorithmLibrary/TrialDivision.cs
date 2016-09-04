@@ -8,7 +8,7 @@ namespace AlgorithmLibrary
 	{		
 		public static BigInteger CheckForSmallComposites(int bits)
 		{
-			if (!(bits <= 20))
+			if (bits > 20)
 			{
 				throw new ArgumentException("bits > 20");
 			}
