@@ -50,7 +50,7 @@ namespace AlgorithmLibrary
 			for (testCount = 1; testCount <= accuracy; testCount++)
 			{
 				random = CryptoRandomSingleton.RandomRange(Two, hopefulLess2);
-				residue = BigInteger.ModPow(random, quotient, hopeful);
+				residue = BigInteger.ModPow(value: random,exponent: quotient, modulus: hopeful);
 
 				if (residue == 1 || residue == hopefulLess1)
 				{
