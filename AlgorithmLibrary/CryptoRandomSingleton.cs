@@ -13,15 +13,23 @@ namespace AlgorithmLibrary
 {
 	public static class CryptoRandomSingleton
 	{
-		private static RNGCryptoServiceProvider _rng;
-		static CryptoRandomSingleton() { _rng = new RNGCryptoServiceProvider(); }
+		public static TimeSpan TotalExecutionTime { get { return executionTimer.TotalTime; } }
+		private static AggregateTimer executionTimer { get; }
+
+		private static RNGCryptoServiceProvider rng;
+
+		static CryptoRandomSingleton()
+		{
+			executionTimer = new AggregateTimer();
+			rng = new RNGCryptoServiceProvider();
+		}
 
 		private static void ClearBuffer(byte[] buffer)
 		{
 			if (buffer != null)
 			{
-				int counter = buffer.Length-1;
-				while(counter>=0)
+				int counter = buffer.Length - 1;
+				while (counter >= 0)
 				{
 					buffer[counter] = byte.MinValue;
 					counter--;
@@ -32,17 +40,17 @@ namespace AlgorithmLibrary
 
 		public static void Dispose()
 		{
-			if (_rng != null)
+			if (rng != null)
 			{
-				_rng.Dispose();
-				_rng = null;
-				_rng = new RNGCryptoServiceProvider();
+				rng.Dispose();
+				rng = null;
+				rng = new RNGCryptoServiceProvider();
 			}
 		}
-		
-		public static void NextBytes(byte[] buffer)
+
+		private static void NextBytes(byte[] buffer)
 		{
-			_rng.GetBytes(buffer);
+			rng.GetBytes(buffer);
 		}
 
 		public static long Next(long maxValue)
@@ -51,22 +59,36 @@ namespace AlgorithmLibrary
 			return Math.Abs(Next() % maxValue);
 		}
 
-		public static long Next()
+		public static double NextDouble()
+		{
+			long next = Next();
+			if (next < 0)
+			{
+				throw new ArithmeticException();
+			}
+			double result = Math.Abs(next * (1.0 / long.MaxValue));
+			return result;
+		}
+
+		private static double notTimedNextDouble()
 		{
 			byte[] rngBytes8 = new byte[8];
-			_rng.GetBytes(rngBytes8);
-			long result = Math.Abs(BitConverter.ToInt64(rngBytes8, 0));
+			rng.GetBytes(rngBytes8);
+			double result = Math.Abs(BitConverter.ToInt64(rngBytes8, 0) * (1.0 / long.MaxValue));
 			ClearBuffer(rngBytes8);
 			return result;
 		}
 
-		public static double NextDouble()
+		private static long Next()
 		{
-			byte[] rngBytes8 = new byte[8];
-			_rng.GetBytes(rngBytes8);
-			double result = Math.Abs(BitConverter.ToInt64(rngBytes8, 0) * (1.0 / long.MaxValue));
-			ClearBuffer(rngBytes8);
-			return result;
+			using (executionTimer.StartTimer())
+			{
+				byte[] rngBytes8 = new byte[8];
+				rng.GetBytes(rngBytes8);
+				long result = Math.Abs(BitConverter.ToInt64(rngBytes8, 0));
+				ClearBuffer(rngBytes8);
+				return result;
+			}
 		}
 
 		public static BigInteger RandomRange(BigInteger lower, BigInteger upper)
@@ -76,25 +98,31 @@ namespace AlgorithmLibrary
 			// long implementation
 			if (lower <= long.MaxValue && upper <= long.MaxValue)
 			{
-				BigInteger range;
-
-				while (true)
+				using (executionTimer.StartTimer())
 				{
-					range = lower + (long)(((long)upper - (long)lower) * NextDouble());
+					BigInteger range;
 
-					if (range >= lower && range <= upper)
+					while (true)
 					{
-						return range;
+						range = lower + (long)(((long)upper - (long)lower) * notTimedNextDouble());
+
+						if (range >= lower && range <= upper)
+						{
+							return range;
+						}
 					}
 				}
 			}
 			else // BigInteger implementation
 			{
-				return RandomRangeBigInteger(lower, upper);
+				using (executionTimer.StartTimer())
+				{
+					return RandomRangeBigInteger(lower, upper);
+				}
 			}
 		}
 
-		public static BigInteger RandomRangeBigInteger(BigInteger lower, BigInteger upper)
+		private static BigInteger RandomRangeBigInteger(BigInteger lower, BigInteger upper)
 		{
 			if (lower > upper) { throw new ArgumentOutOfRangeException("Upper must be greater than upper"); }
 
@@ -102,7 +130,7 @@ namespace AlgorithmLibrary
 			byte[] deltaBytes = delta.ToByteArray();
 			byte[] buffer = new byte[deltaBytes.Length];
 			ClearBuffer(deltaBytes);
-			
+
 			BigInteger result;
 			while (true)
 			{
@@ -113,7 +141,7 @@ namespace AlgorithmLibrary
 				if (result >= lower && result <= upper)
 				{
 					ClearBuffer(buffer);
-					
+
 					return result;
 				}
 			}

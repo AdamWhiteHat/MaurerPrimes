@@ -38,6 +38,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.tbSearchDepth = new System.Windows.Forms.TextBox();
 			this.label3 = new System.Windows.Forms.Label();
+			this.btnJacobi = new System.Windows.Forms.Button();
 			this.SuspendLayout();
 			// 
 			// btnSearch
@@ -99,6 +100,13 @@
 			this.btnMultiply.UseVisualStyleBackColor = true;
 			this.btnMultiply.Click += new System.EventHandler(this.btnMultiply_Click);
 			// 
+			// btnTrialDivision
+			// 
+			this.btnTrialDivision.Location = new System.Drawing.Point(0, 0);
+			this.btnTrialDivision.Name = "btnTrialDivision";
+			this.btnTrialDivision.Size = new System.Drawing.Size(75, 23);
+			this.btnTrialDivision.TabIndex = 10;
+			// 
 			// label1
 			// 
 			this.label1.AutoSize = true;
@@ -137,11 +145,23 @@
 			this.label3.Text = "Miller-Rabin Composite Tests:";
 			this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
 			// 
+			// btnJacobi
+			// 
+			this.btnJacobi.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+			this.btnJacobi.Location = new System.Drawing.Point(763, 68);
+			this.btnJacobi.Name = "btnJacobi";
+			this.btnJacobi.Size = new System.Drawing.Size(85, 22);
+			this.btnJacobi.TabIndex = 11;
+			this.btnJacobi.Text = "Jacobi Symbol";
+			this.btnJacobi.UseVisualStyleBackColor = true;
+			this.btnJacobi.Click += new System.EventHandler(this.btnJacobi_Click);
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(852, 455);
+			this.Controls.Add(this.btnJacobi);
 			this.Controls.Add(this.label3);
 			this.Controls.Add(this.tbSearchDepth);
 			this.Controls.Add(this.label2);
@@ -172,5 +192,6 @@
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.TextBox tbSearchDepth;
 		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Button btnJacobi;
 	}
 }

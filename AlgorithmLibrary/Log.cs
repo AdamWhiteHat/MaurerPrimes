@@ -4,18 +4,21 @@ using System.Linq;
 
 namespace AlgorithmLibrary
 {
-	public sealed class Log
+	public static class Log
 	{
-		//private static int recursionDepthCount;
-		private static bool loggingEnabled;
-		private static string filename;
+		public static string LogFilename { get; set; }
+		public static TimeSpan TotalExecutionTime { get { return executionTimer.TotalTime; } }
+		private static AggregateTimer executionTimer { get; }
+		
+		private static bool loggingEnabled;		
 		private static DepthCounter depth; // Use a class instead of mutating a static variable
 
 		static Log()
 		{
 			loggingEnabled = false;
-			filename = "Methods.log.txt";
+			LogFilename = "Methods.log.txt";
 			depth = new DepthCounter();
+			executionTimer = new AggregateTimer();
 		}
 
 		public static void SetLoggingPreference(bool enabled)
@@ -74,8 +77,11 @@ namespace AlgorithmLibrary
 		{
 			if (loggingEnabled)
 			{
-				string toLog = message.Replace("\n", "\n" + depth.GetPadding());
-				File.AppendAllText(filename, depth.GetPadding() + toLog + Environment.NewLine);
+				using (executionTimer.StartTimer())
+				{
+					string toLog = message.Replace("\n", "\n" + depth.GetPadding());
+					File.AppendAllText(LogFilename, depth.GetPadding() + toLog + Environment.NewLine);
+				}
 			}
 		}
 

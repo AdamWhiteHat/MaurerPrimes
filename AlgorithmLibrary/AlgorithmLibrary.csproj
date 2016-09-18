@@ -46,11 +46,14 @@
   <ItemGroup>
     <Compile Include="Algorithm.cs" />
     <Compile Include="CryptoRandomSingleton.cs" />
+    <Compile Include="Fermats.cs" />
     <Compile Include="Log.cs" />
+    <Compile Include="Lucas.cs" />
     <Compile Include="MillerRabin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sieve.cs" />
     <Compile Include="ThreadedAlgorithmWorker.cs" />
+    <Compile Include="AggregateTimer.cs" />
     <Compile Include="TrialDivision.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

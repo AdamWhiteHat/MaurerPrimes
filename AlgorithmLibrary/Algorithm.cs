@@ -60,7 +60,7 @@ namespace AlgorithmLibrary
 		public BigInteger ProvablePrime(int bits, int compositeSearchRounds)
 		{
 			disposeCheck();
-			BigInteger hopeful = 0;
+			BigInteger result = 0;
 
 			Console.Write(".");
 			Log.MethodEnter("ProvablePrime", bits);
@@ -76,8 +76,8 @@ namespace AlgorithmLibrary
 			if (bits <= 20)
 			{
 				Log.Message("***MAXIMUM RECURSION DEPT REACHED");
-				hopeful = TrialDivision.CheckForSmallComposites(bits);
-				Log.Message("***Hopeful prime: {0}", hopeful);
+				result = TrialDivision.FindSmallPrimes(bits);
+				Log.Message("***Hopeful prime: {0}", result);
 			}
 			else
 			{
@@ -132,24 +132,24 @@ namespace AlgorithmLibrary
 					BigInteger J = I + 1;
 					BigInteger K = 2 * I;
 					BigInteger rand1 = CryptoRandomSingleton.RandomRange(J, K);
-					hopeful = 2 * rand1;
-					hopeful = hopeful * smallPrime;
-					hopeful = hopeful + 1;
+					result = 2 * rand1;
+					result = result * smallPrime;
+					result = result + 1;
 
 					BigInteger mod = new BigInteger();
 					for (int i = 0; !done && i < primes.Count; i++)
 					{
-						mod = hopeful % primes[i];
+						mod = result % primes[i];
 						done = mod == 0;
 					}
 
 					if (!done)
 					{
 						//LogMethod("ProvablePrime.RandomRange(J: {0}, K: {1}) = {2}", J, K, rand1);
-						if (MillerRabin.CompositeTest(hopeful, compositeSearchRounds))
+						if (MillerRabin.CompositeTest(result, compositeSearchRounds))
 						{
 							success = true;
-							string cert = MillerRabin.GetCertificateOfPrimality(hopeful, rand1);
+							string cert = MillerRabin.GetCertificateOfPrimality(result, rand1);
 
 							if (cert != null)
 							{
@@ -162,7 +162,7 @@ namespace AlgorithmLibrary
 
 			Console.Write(".");
 			Log.MethodLeave();
-			return hopeful;
+			return result;
 		}
 
 		public static double Log2(BigInteger n)

@@ -10,15 +10,13 @@ using System.Threading.Tasks;
 namespace AlgorithmLibrary
 {
 	public class ThreadedAlgorithmWorker
-	{		
-		
+	{
 		public object Argument { get; private set; }
 		public BigInteger Result { get; private set; }
 		public TimeSpan RuntimeTimer { get; private set; }
 		public Func<CancellationToken, object, BigInteger> DoWorkFunc;
 		public event RunWorkerCompletedEventHandler WorkerComplete;
 		public int CompositeSearchDepth { get; set; } = 4;
-
 		
 		private DateTime startTime;
 		private Algorithm algorithm;

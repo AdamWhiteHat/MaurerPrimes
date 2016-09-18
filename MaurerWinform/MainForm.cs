@@ -29,6 +29,7 @@ namespace MaurerWinform
 		private static readonly string PrimalityTestInstructions = Environment.NewLine + "Please enter the number you wish to factor into the input TextBox.";
 		private static readonly string MultiplyInstructions = Environment.NewLine + "Please put the two numbers you wish to multiply onto separate lines into the input TextBox.";
 		private static readonly string TrialDivisionInstructions = Environment.NewLine + "Please put the number you wish to divide into the input TextBox.";
+		private static readonly string JacobiInstructions = Environment.NewLine + "Input accepted in the form of: D/n";
 
 		public MainForm()
 		{
@@ -98,7 +99,7 @@ namespace MaurerWinform
 				}
 			}
 		}
-			
+
 		private void ResetCancellationTokenSource()
 		{
 			if (cancelSource != null)
@@ -283,5 +284,30 @@ namespace MaurerWinform
 			}
 		}
 
+		private void btnJacobi_Click(object sender, EventArgs e)
+		{
+			throw new NotImplementedException();
+			string input = CleanupString(tbInput.Text, false).Replace("\r", "");
+			if (input.Any(c => "\\/\n".Contains(c)))
+			{
+				string[] lines = input.Split('/', '\\', '\n');
+				if (lines.Length == 2)
+				{
+					int D = 0; // D/n
+					int n = 0;
+
+					if (int.TryParse(lines[0], out D)
+						&& int.TryParse(lines[1], out n))
+					{
+						int jacobiSymbol = 0;//Jacobi.Symbol(D, n);
+						tbOutput.AppendText(Environment.NewLine + jacobiSymbol.ToString());
+						return;
+					}
+				}
+			}		
+
+			DisplayErrorMessage(JacobiInstructions);
+			return;
+		}
 	}
 }
