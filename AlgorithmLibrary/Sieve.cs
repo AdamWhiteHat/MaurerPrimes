@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AlgorithmLibrary
 {
-	public class Eratosthenes
+	public static class Eratosthenes
 	{
 		private static List<long> longestSieve;
 		private static List<bool> longestprimeMembershipArray;

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace AlgorithmLibrary
 {
-	public class TrialDivision
+	public static class TrialDivision
 	{		
 		public static BigInteger CheckForSmallComposites(int bits)
 		{

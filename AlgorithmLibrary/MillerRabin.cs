@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace AlgorithmLibrary
 {
-	public class MillerRabin
+	public static class MillerRabin
 	{
 		private static readonly BigInteger Two = new BigInteger(2);
 

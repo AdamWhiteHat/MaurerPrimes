@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace AlgorithmLibrary
 {
-	public sealed class Log
+	public static class Log
 	{
 		//private static int recursionDepthCount;
 		private static bool loggingEnabled;
