@@ -28,8 +28,7 @@ namespace AlgorithmLibrary
                     return true;
                 }
 
-                //BigInteger remainder = hopeful & 1;
-                BigInteger remainder = testValue % Two;
+                BigInteger remainder = testValue & 1; // % Two;
 
                 if (remainder == 0)
                 {
@@ -40,17 +39,13 @@ namespace AlgorithmLibrary
                 BigInteger hopefulLess1 = testValue - 1;
                 BigInteger quotient = hopefulLess1;
 
-                //remainder = quotient & 1;
-                remainder = quotient % Two;
+                remainder = quotient & 1; // % Two;
 
                 long divisionCount = 0;
                 while (remainder == 0)
                 {
-                    //quotient = quotient >> 1;
-                    quotient = quotient / Two;
-
-                    //remainder = quotient & 1;
-                    remainder = quotient % Two;
+                    quotient = quotient >> 1; // / Two;
+                    remainder = quotient & 1; // % Two;
                     divisionCount++;
                 }
 
@@ -75,8 +70,7 @@ namespace AlgorithmLibrary
                     modCount = 1;
                     while (modCount <= divisionCount && residue != hopefulLess1)
                     {
-                        residue = BigInteger.ModPow(residue, 2, testValue);
-                        // residue = (residue << 1) % hopeful;
+                         residue = (residue << 1) % testValue;
 
                         if (residue == 1)
                         {
@@ -86,7 +80,6 @@ namespace AlgorithmLibrary
 
                         modCount++;
                     }
-
 
                     if (residue != hopefulLess1)
                     {
@@ -112,9 +105,6 @@ namespace AlgorithmLibrary
 
                 if (gcd == 1)
                 {
-                    //LogMethod("GetCertificateOfPrimality.RandomRange({0}, {1}) = {2}", Two, (probable - Two), witness);
-
-                    //Console.Write(".");
                     result = Environment.NewLine;
                     result += string.Format("Certificate of primality({0})", probable) + Environment.NewLine;
                     result += "{" + Environment.NewLine;
