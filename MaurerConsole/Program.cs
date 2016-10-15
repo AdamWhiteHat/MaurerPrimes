@@ -90,6 +90,18 @@ namespace MaurerConsole
 				counter++;
 			}
 
+			if (!string.IsNullOrWhiteSpace(Settings.LogFile_Timers))
+			{
+				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.OutsideExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.OutsideExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.InsideExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.InsideExecutionTime));
+
+				WriteLogFile(Settings.LogFile_Timers, "Log.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Log.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "Eratosthenes.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Eratosthenes.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "TrialDivision.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(TrialDivision.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "CryptoRandomSingleton.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(CryptoRandomSingleton.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, Environment.NewLine);
+			}
+
 			if (worker.Result == WorkerResultType.Canceled)
 			{
 				Log.Message("*** OPERATION ABORTED ***");
@@ -113,14 +125,7 @@ namespace MaurerConsole
 					LogPrime(prime, worker.RunTime, sizeTextPosition, counter);
 				}
 			}
-
-			WriteLogFile(Settings.LogFile_Timers, "Log.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Log.TotalExecutionTime));
-			WriteLogFile(Settings.LogFile_Timers, "MillerRabin.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.TotalExecutionTime));
-			WriteLogFile(Settings.LogFile_Timers, "Eratosthenes.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Eratosthenes.TotalExecutionTime));
-			WriteLogFile(Settings.LogFile_Timers, "TrialDivision.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(TrialDivision.TotalExecutionTime));
-			WriteLogFile(Settings.LogFile_Timers, "CryptoRandomSingleton.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(CryptoRandomSingleton.TotalExecutionTime));
-			WriteLogFile(Settings.LogFile_Timers, Environment.NewLine);
-
+						
 			Console.WriteLine(DashedLine);
 			Console.WriteLine();
 			Console.WriteLine("Finished. Hit any key to terminate...");
@@ -130,7 +135,7 @@ namespace MaurerConsole
 
 		private static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
 		{
-			File.AppendAllText(Settings.LogFile_Exceptions, e.Exception.ToString());			
+			WriteLogFile(Settings.LogFile_Exceptions, e.Exception.ToString());			
 		}
 
 		private static void DisplayError(Exception error)

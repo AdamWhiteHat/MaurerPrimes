@@ -37,14 +37,8 @@ namespace AlgorithmLibrary
 					}
 
 					upperBound = (long)Math.Sqrt(n);
-
-					lucky = Eratosthenes.Sieve(upperBound);
-					//composite = false;
-
+					lucky = Eratosthenes.Sieve(upperBound);					
 					composite = lucky.Any(l => n % l == 0);
-
-					// Below line replaced by line above
-					//for (int i = 0; !composite && i < lucky.Count; i++) { composite = n % lucky[i] == 0; }
 
 					if (!composite)
 					{

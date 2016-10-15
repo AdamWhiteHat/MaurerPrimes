@@ -17,7 +17,7 @@ namespace AlgorithmLibrary
 		public Func<CancellationToken, object, BigInteger> DoWorkFunc;
 		public event RunWorkerCompletedEventHandler WorkerComplete;
 		public int CompositeSearchDepth { get; set; } = 4;
-		
+
 		private DateTime startTime;
 		private Algorithm algorithm;
 		private BackgroundWorker bgWorker;
@@ -105,11 +105,15 @@ namespace AlgorithmLibrary
 			{
 				return "0.0";
 			}
+			if (timeSpan.TotalMilliseconds < 1000)
+			{
+				return string.Concat(timeSpan.Milliseconds.ToString().PadLeft(3), "ms ");
+			}
 
 			StringBuilder result = new StringBuilder();
-			if (timeSpan.Days > 0) result.Append(timeSpan.Days.ToString().PadLeft(2)).Append("d ");
-			if (timeSpan.Hours > 0) result.Append(timeSpan.Hours.ToString().PadLeft(2)).Append("h ");
-			if (timeSpan.Minutes > 0) result.Append(timeSpan.Minutes.ToString().PadLeft(2)).Append("m ");
+			if (timeSpan.Days > 0) { result.Append(timeSpan.Days.ToString().PadLeft(2)).Append("d "); }
+			if (timeSpan.Hours > 0) { result.Append(timeSpan.Hours.ToString().PadLeft(2)).Append("h "); }
+			if (timeSpan.Minutes > 0) { result.Append(timeSpan.Minutes.ToString().PadLeft(2)).Append("m "); }
 			if (timeSpan.Seconds > 0)
 			{
 				result.Append(timeSpan.Seconds.ToString().PadLeft(2));
@@ -119,8 +123,7 @@ namespace AlgorithmLibrary
 				}
 				result.Append("s");
 			}
-
-			if (timeSpan.TotalMilliseconds < 1000) result.Append(timeSpan.Milliseconds.ToString().PadLeft(3)).Append("ms");
+						
 			return result.ToString();
 		}
 	}
