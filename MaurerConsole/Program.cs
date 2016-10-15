@@ -17,7 +17,8 @@ namespace MaurerConsole
 			int sizeTextPosition = 0;
 			int max = Settings.Quantity;
 			int primeBitSize = Settings.Prime_BitSize;
-			
+			Log.LogFilename = Settings.LogFile_Methods;
+
 			Console.CursorVisible = false;
 			ConsoleWorker worker = new ConsoleWorker(Settings.Logging_Enabled);
 			Console.ForegroundColor = ConsoleColor.White;
@@ -89,9 +90,21 @@ namespace MaurerConsole
 				counter++;
 			}
 
+			if (!string.IsNullOrWhiteSpace(Settings.LogFile_Timers))
+			{
+				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.OutsideExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.OutsideExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.InsideExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.InsideExecutionTime));
+
+				WriteLogFile(Settings.LogFile_Timers, "Log.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Log.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "Eratosthenes.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Eratosthenes.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "TrialDivision.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(TrialDivision.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "CryptoRandomSingleton.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(CryptoRandomSingleton.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, Environment.NewLine);
+			}
 
 			if (worker.Result == WorkerResultType.Canceled)
 			{
+				Log.Message("*** OPERATION ABORTED ***");
 				Console.WriteLine(DashedLine);
 				Console.WriteLine();
 				Console.WriteLine("Aborted. Hit any key to terminate...");
@@ -112,7 +125,7 @@ namespace MaurerConsole
 					LogPrime(prime, worker.RunTime, sizeTextPosition, counter);
 				}
 			}
-
+						
 			Console.WriteLine(DashedLine);
 			Console.WriteLine();
 			Console.WriteLine("Finished. Hit any key to terminate...");
@@ -120,9 +133,9 @@ namespace MaurerConsole
 			Console.ResetColor();
 		}
 
-		static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
+		private static void CurrentDomain_FirstChanceException(object sender, System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs e)
 		{
-			File.AppendAllText("Console-FirstChanceException.txt", e.Exception.ToString());
+			WriteLogFile(Settings.LogFile_Exceptions, e.Exception.ToString());			
 		}
 
 		private static void DisplayError(Exception error)
@@ -144,7 +157,7 @@ namespace MaurerConsole
 
 				Console.WriteLine("] {0} (time elapsed)", ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed));
 				Console.WriteLine();
-				Console.WriteLine(" OUTPUT:  ..\\{0}", Settings.File_Output.ToUpperInvariant());
+				Console.WriteLine(" OUTPUT:  ..\\{0}", Settings.LogFile_Primes.ToUpperInvariant());
 
 				int saveCursorTop = Console.CursorTop;
 				Console.SetCursorPosition(0, cursorTopPosition);
@@ -152,14 +165,19 @@ namespace MaurerConsole
 				Console.SetCursorPosition(0, saveCursorTop);
 				Console.WriteLine();
 
-				string fileOutput = string.Format("{1} bit prime ({2} digits):{0}{3}{0}{0}", Environment.NewLine, log2prime, log10prime, primeText);
-				File.AppendAllText(Settings.File_Output, fileOutput);
+				string fileOutput = string.Format("{1} bit prime ({2} digits):{0}{3}{0}", Environment.NewLine, log2prime, log10prime, primeText);
+				WriteLogFile(Settings.LogFile_Primes, fileOutput);
 			}
 			else
 			{
-				File.AppendAllText(Settings.File_Output, string.Concat(primeText, Environment.NewLine));
+				WriteLogFile(Settings.LogFile_Primes, primeText);
 			}
 			Console.Write(string.Format("({0})",count.ToString()));
+		}
+
+		private static void WriteLogFile(string filename, string message)
+		{
+			File.AppendAllText(filename, message + Environment.NewLine);
 		}
 	}
 }
