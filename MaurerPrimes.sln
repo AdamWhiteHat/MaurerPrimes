@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgorithmLibrary", "Algorit
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MaurerConsole", "MaurerConsole\MaurerConsole.csproj", "{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMaurerPrimes", "TestMaurerPrimes\TestMaurerPrimes.csproj", "{09B38C3A-F559-482A-BD3D-9697B96C1C33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98D34F14-80DA-4D52-9533-FBD9D3BBC37B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{09B38C3A-F559-482A-BD3D-9697B96C1C33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{09B38C3A-F559-482A-BD3D-9697B96C1C33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{09B38C3A-F559-482A-BD3D-9697B96C1C33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{09B38C3A-F559-482A-BD3D-9697B96C1C33}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

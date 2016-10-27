@@ -56,6 +56,9 @@ MaurerConsole/bin/*
 MaurerWinform/obj/*
 MaurerWinform/bin/*
 
+/TestMaurerPrimes/obj/*
+/TestMaurerPrimes/bin/*
+
 *.suo
 *.scgdat
 *.dat
