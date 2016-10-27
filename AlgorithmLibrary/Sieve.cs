@@ -47,15 +47,18 @@ namespace AlgorithmLibrary
 				long sqrt = 3;
 				bool[] primeMembershipArray = new bool[ceiling + 1];
 
-				if (longestprimeMembershipArray.Count > counterStart /*&& longestprimeMembershipArray.Length < ceiling+1*/)
-				{
-					Array.ConstrainedCopy(longestprimeMembershipArray.ToArray(), 0, primeMembershipArray, 0, (int)Math.Min(longestprimeMembershipArray.Count, ceiling + 1));
-				}
-
-				primeMembershipArray[2] = true;
+                if (longestprimeMembershipArray.Count > counterStart /*&& longestprimeMembershipArray.Length < ceiling+1*/)
+                {
+                    Array.ConstrainedCopy(longestprimeMembershipArray.ToArray(), 0, primeMembershipArray, 0, (int)Math.Min(longestprimeMembershipArray.Count, ceiling + 1));
+                    //counterStart = longestprimeMembershipArray.Count - 2;
+                }
+            
+                    primeMembershipArray[2] = true;
+                                
+                // Set all odds as true
 				for (counter = counterStart; counter <= ceiling; counter += 2)
 				{
-					if ((counter & 1) == 1)//% 2 == 1)
+					if ((counter & 1) == 1)//% 2 == 1) // Check if odd
 					{
 						primeMembershipArray[counter] = true;
 					}
@@ -65,8 +68,8 @@ namespace AlgorithmLibrary
 				{
 					counter = sqrt * sqrt;
 					inc = sqrt + sqrt;
-
-					while (counter <= ceiling)
+                                       
+                    while (counter <= ceiling)
 					{
 						primeMembershipArray[counter] = false;
 						counter += inc;

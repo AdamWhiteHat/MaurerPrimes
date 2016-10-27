@@ -41,6 +41,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.btnDivide = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.panel3.SuspendLayout();
@@ -50,7 +51,7 @@
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Location = new System.Drawing.Point(2, 30);
+            this.btnSearch.Location = new System.Drawing.Point(2, 23);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(110, 22);
             this.btnSearch.TabIndex = 0;
@@ -115,7 +116,7 @@
             // 
             this.btnTrialDivisionBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTrialDivisionBrowse.Location = new System.Drawing.Point(2, 58);
+            this.btnTrialDivisionBrowse.Location = new System.Drawing.Point(2, 65);
             this.btnTrialDivisionBrowse.Name = "btnTrialDivisionBrowse";
             this.btnTrialDivisionBrowse.Size = new System.Drawing.Size(110, 22);
             this.btnTrialDivisionBrowse.TabIndex = 10;
@@ -190,6 +191,7 @@
             // panel3
             // 
             this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel3.Controls.Add(this.btnDivide);
             this.panel3.Controls.Add(this.btnPrimalityTest);
             this.panel3.Controls.Add(this.btnSearch);
             this.panel3.Controls.Add(this.btnTrialDivisionBrowse);
@@ -198,6 +200,18 @@
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(114, 126);
             this.panel3.TabIndex = 15;
+            // 
+            // btnDivide
+            // 
+            this.btnDivide.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDivide.Location = new System.Drawing.Point(2, 44);
+            this.btnDivide.Name = "btnDivide";
+            this.btnDivide.Size = new System.Drawing.Size(110, 22);
+            this.btnDivide.TabIndex = 11;
+            this.btnDivide.Text = "<- Divide by list...";
+            this.btnDivide.UseVisualStyleBackColor = true;
+            this.btnDivide.Click += new System.EventHandler(this.btnDivide_Click);
             // 
             // MainForm
             // 
@@ -234,5 +248,6 @@
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
+        private System.Windows.Forms.Button btnDivide;
     }
 }
