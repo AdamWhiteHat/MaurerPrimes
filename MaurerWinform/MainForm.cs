@@ -45,24 +45,27 @@ namespace MaurerWinform
 
         public void WriteOutputLine(string message, bool atBegining = false)
         {
+            WriteOutput(message + Environment.NewLine, atBegining);
+        }
+
+        public void WriteOutput(string message, bool atBegining = false)
+        {
             if (tbOutput.InvokeRequired)
             {
-                tbOutput.Invoke(new MethodInvoker(() => { WriteOutputLine(message); }));
+                tbOutput.Invoke(new MethodInvoker(() => { WriteOutput(message); }));
             }
             else
             {
-                string text = Environment.NewLine;
                 if (!string.IsNullOrWhiteSpace(message))
                 {
-                    text = string.Concat(message, Environment.NewLine);
-                }
-                if (atBegining)
-                {
-                    tbOutput.Text = tbOutput.Text.Insert(0, text);
-                }
-                else
-                {
-                    tbOutput.AppendText(text);
+                    if (atBegining)
+                    {
+                        tbOutput.Text = tbOutput.Text.Insert(0, message);
+                    }
+                    else
+                    {
+                        tbOutput.AppendText(message);
+                    }
                 }
             }
         }
@@ -265,6 +268,17 @@ namespace MaurerWinform
         }
 
 
+        private List<string> GetInputLines()
+        {
+            List<string> result = tbInput.Lines.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => StripNonnumericCharacters(s)).ToList();
+
+            if (tbInput.Lines.Any(s => s.Any(c => !Numbers.Contains(c))))  // Check for non-numerical characters
+            {
+                DisplayErrorMessage("Some lines contain non-numeric characters; these will be stripped out automatically. Please review the output carefully before relying on it.");
+            }
+            return result;
+        }
+
         private void btnTestPrimality_Click(object sender, EventArgs e)
         {
             if (IsBusy)
@@ -272,13 +286,7 @@ namespace MaurerWinform
                 return;
             }
 
-            List<string> inputLines = tbInput.Lines.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => StripNonnumericCharacters(s)).ToList();
-
-            if (tbInput.Lines.Any(s => s.Any(c => !Numbers.Contains(c))))  // Check for non-numerical characters
-            {
-                DisplayErrorMessage("Some lines contain non-numeric characters; these will be stripped out automatically. Please review the output carefully before relying on it.");
-                return;
-            }
+            List<string> inputLines = GetInputLines();
 
             DateTime startTime = DateTime.Now;
 
@@ -343,6 +351,61 @@ namespace MaurerWinform
 
                 WriteOutputLine(string.Format("=\n{0}", result.ToString()), true);
             }
+        }
+
+        private void btnDivide_Click(object sender, EventArgs e)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            string filename = "";
+            using (OpenFileDialog fileDialog = new OpenFileDialog())
+            {
+                if (fileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    filename = fileDialog.FileName;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(filename))
+            {
+                return;
+            }
+
+            List<string> inputLines = GetInputLines();
+
+            string[] fileLines = File.ReadAllLines(filename);
+            if (fileLines == null || fileLines.Length < 1)
+            {
+                return;
+            }
+
+            List<BigInteger> dividends = inputLines.Select(s => BigInteger.Parse(StripNonnumericCharacters(s))).ToList();
+            IEnumerable<BigInteger> divisors = fileLines.Select(s => BigInteger.Parse(StripNonnumericCharacters(s)));
+
+            BigInteger quotient = new BigInteger();
+            BigInteger remainder = new BigInteger();
+
+            foreach (BigInteger divisor in divisors)
+            {
+                foreach (BigInteger dividend in dividends)
+                {
+                    quotient = BigInteger.DivRem(dividend, divisor, out remainder);
+
+                    if (remainder == BigInteger.Zero)
+                    {
+                        WriteOutputLine(string.Format("{0} / {1} = {2}", dividend, divisor, quotient));
+                    }
+                    //else
+                    //{
+                    //    WriteOutput(".");
+                    //}
+                }
+            }
+
+            WriteOutputLine("--- END ---");
         }
     }
 }
