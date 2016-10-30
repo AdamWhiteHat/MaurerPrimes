@@ -29,7 +29,7 @@ namespace MaurerWinform
         private static readonly string Numbers = "0123456789";
         private static readonly string MessageBoxCaption = "Oops!";
         private static readonly string PrimalityTestInstructions = Environment.NewLine + "Please enter the number you wish to factor into the input TextBox.";
-        private static readonly string MultiplyInstructions = Environment.NewLine + "Please put the two numbers you wish to multiply onto separate lines into the input TextBox.";
+        private static readonly string MultiplyInstructions = Environment.NewLine + "Please put two or more numbers you wish to multiply on separate lines into the input TextBox.";
         private static readonly string TrialDivisionInstructions = Environment.NewLine + "Please put the number you wish to divide into the input TextBox.";
         private static readonly string JacobiInstructions = Environment.NewLine + "Input accepted in the form of: D/n";
 
@@ -329,25 +329,32 @@ namespace MaurerWinform
             {
                 DisplayErrorMessage("No numeric input detected! " + MultiplyInstructions);
             }
-            else if (tbInput.Lines.Length != 2)
-            {
-                DisplayErrorMessage("Only one input line detected! " + MultiplyInstructions);
-            }
             else
             {
-                string num1 = tbInput.Lines[0].Trim();
-                string num2 = tbInput.Lines[1].Trim();
+                List<BigInteger> numbers = tbInput.Lines.Where(s => !string.IsNullOrWhiteSpace(new string(s.Trim().Where(c => Numbers.Contains(c)).ToArray()))).Select( s => BigInteger.Parse(s)).ToList();
 
-                if (num1.Any(c => !Numbers.Contains(c)) || num2.Any(c => !Numbers.Contains(c)))
+                if (numbers.Count < 2)
                 {
-                    DisplayErrorMessage("Non-numeric characters detected in the input! " + MultiplyInstructions);
+                    DisplayErrorMessage("Need at least two numbers to perform the binary operation, multiplication. " + MultiplyInstructions);
                     return;
                 }
 
-                BigInteger bigInt1 = BigInteger.Parse(num1);
-                BigInteger bigInt2 = BigInteger.Parse(num2);
+                BigInteger a = BigInteger.MinusOne;
+                BigInteger b = BigInteger.MinusOne;                
+                BigInteger result = BigInteger.MinusOne;
+                    
+                a = numbers.First();                
+                numbers.Remove(a);
 
-                BigInteger result = BigInteger.Multiply(bigInt1, bigInt2);
+                while (numbers.Any())
+                {
+                    b = numbers.First();
+                    numbers.Remove(b);
+
+                    result = BigInteger.Multiply(a, b);
+
+                    a = result;                    
+                }
 
                 WriteOutputLine(string.Format("=\n{0}", result.ToString()), true);
             }
