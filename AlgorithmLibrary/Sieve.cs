@@ -18,12 +18,21 @@ namespace AlgorithmLibrary
 			longestprimeMembershipArray = new List<bool>();
 			executionTimer = new AggregateTimer();
 		}
-		
-		/// <summary>
-		/// Sieve of Eratosthenes. Find all prime numbers less than or equal ceiling
-		/// </summary>
-		public static List<long> Sieve(long ceiling)
+
+        /// <summary>
+        /// Sieve of Eratosthenes. Find all prime numbers less than or equal ceiling
+        /// </summary>
+        public static List<long> Sieve(long ceiling)
+        {
+            return Sieve(2, ceiling);
+        }
+
+        public static List<long> Sieve(int floor, long ceiling)
 		{
+            if(floor < 2)
+            {
+                floor = 2;
+            }
 			using (executionTimer.StartTimer())
 			{
 				Log.MethodEnter("Eratosthenes.Sieve", ceiling);
@@ -84,7 +93,7 @@ namespace AlgorithmLibrary
 				} while (sqrt * sqrt <= ceiling);
 
 
-				List<long> result = Enumerable.Range(2, (int)ceiling - 2).Select(n => (long)n).Where(l => primeMembershipArray[l]).ToList();
+                List<long> result = Enumerable.Range(2, (int)ceiling - 2).Select(n => (long)n).Where(l => l >= floor && primeMembershipArray[l]).ToList();
 
 				if (result.Count > longestSieve.Count)
 				{

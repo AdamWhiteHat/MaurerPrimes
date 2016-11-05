@@ -26,8 +26,9 @@ namespace MaurerWinform
         private System.Windows.Forms.Timer testPrimalityChecker;
 
         private static readonly int DefaultSearchDepth = Settings.Search_Depth;
-        private static readonly string Numbers = "0123456789";
+        private static readonly string Numbers = "-0123456789";
         private static readonly string MessageBoxCaption = "Oops!";
+        private static readonly string FinishMessage = "Finished";
         private static readonly string PrimalityTestInstructions = Environment.NewLine + "Please enter the number you wish to factor into the input TextBox.";
         private static readonly string MultiplyInstructions = Environment.NewLine + "Please put two or more numbers you wish to multiply on separate lines into the input TextBox.";
         private static readonly string TrialDivisionInstructions = Environment.NewLine + "Please put the number you wish to divide into the input TextBox.";
@@ -43,69 +44,115 @@ namespace MaurerWinform
             Log.SetLoggingPreference(Settings.Logging_Enabled);
         }
 
-        public void WriteOutputLine(string message, bool atBegining = false)
+
+        #region HelperFunctions
+
+        public void WriteOutputTextboxLine(string message, bool atBegining = false)
         {
-            WriteOutput(message + Environment.NewLine, atBegining);
+            WriteOutputTextbox(message + Environment.NewLine, atBegining);
         }
 
-        public void WriteOutput(string message, bool atBegining = false)
+        public void WriteOutputTextbox(string message, bool atBegining = false)
         {
             if (tbOutput.InvokeRequired)
             {
-                tbOutput.Invoke(new MethodInvoker(() => { WriteOutput(message); }));
+                tbOutput.Invoke(new MethodInvoker(() => { WriteOutputTextbox(message); }));
             }
             else
             {
-                if (!string.IsNullOrWhiteSpace(message))
+                if (string.IsNullOrWhiteSpace(message))
                 {
-                    if (atBegining)
-                    {
-                        tbOutput.Text = tbOutput.Text.Insert(0, message);
-                    }
-                    else
-                    {
-                        tbOutput.AppendText(message);
-                    }
+                    return;
                 }
-            }
-        }
 
-        private void btnSearch_Click(object sender, EventArgs e)
-        {
-            //tbOutput.Clear();
-
-            if (IsBusy)
-            {
-                CancelBackgroundWorker();
-            }
-            else
-            {
-                IsBusy = true;
-                SetButtonText(false);
-
-                string input = CleanupString(tbInput.Text);
-
-                int bits = 0;
-                if (!int.TryParse(input, out bits))
+                if (atBegining)
                 {
-                    DisplayErrorMessage("Error parsing number of bits: Try entering only numeric characters into the input TextBox.");
-                }
-                else if (bits < 7)
-                {
-                    DisplayErrorMessage("If you need to find prime numbers smaller than seven 7 bits, use a non-specialized calculator.");
+                    tbOutput.Text = tbOutput.Text.Insert(0, message);
                 }
                 else
                 {
-                    algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth, Settings.Logging_Enabled);
-                    algorithmWorker.DoWorkFunc = algorithmWorker.DoWork_FindPrime;
-                    algorithmWorker.WorkerComplete += FindPrimes_WorkerComplete;
-
-                    ResetCancellationTokenSource();
-
-                    algorithmWorker.StartWorker(cancelSource.Token, bits);
+                    tbOutput.AppendText(message);
                 }
             }
         }
+
+        private void WriteMessageBox(string message, string caption = "")
+        {
+            MessageBox.Show(message, string.IsNullOrWhiteSpace(caption) ? MessageBoxCaption : caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        }
+
+        private List<BigInteger> GetInputNumbers()
+        {
+            List<BigInteger> result = tbInput.Lines.Where(s => !string.IsNullOrWhiteSpace(StripNonnumericCharacters(s))).Select(s => BigInteger.Parse(s)).ToList();
+
+            if (tbInput.Lines.Any(s => s.Any(c => !Numbers.Contains(c))))  // Check for non-numerical characters
+            {
+                // A MessageBox which could hold the thread for a long time is probably not expected from such a function
+                // instead of remove the warning, we can just launch in thread.
+                new Thread(() =>
+                {
+                    WriteMessageBox("Some lines contain non-numeric characters; these will be stripped out automatically. Please review the output carefully before relying on it.");
+                })
+                .Start();
+            }
+
+            return result;
+        }
+
+        private string StripNonnumericCharacters(string input)
+        {
+            return string.IsNullOrEmpty(input) ? "" : new string(input.Where(c => Numbers.Contains(c)).ToArray()).TrimStart('0');
+        }
+
+        private string CleanupString(string input, bool removeNewlines = true)
+        {
+            string result = input ?? "";
+            if (!string.IsNullOrEmpty(result))
+            {
+                result = result.Trim();        // Trim all leading and trailing whitespace
+                result = result.Replace(",", "");   // Remove any commas, often used as place-value separators (in USA)
+                if (removeNewlines)
+                {
+                    result = result.Replace("\r", "");  // Remove any line-feeds or carriage returns in case
+                    result = result.Replace("\n", ""); //   pasted from shitty text editor with word wrapping
+                }
+            }
+            return result;
+        }
+
+        private void SetButtonText(bool enable, string resetText = "")
+        {
+            btnSearch.Text = enable ? resetText : "Cancel";
+        }
+
+        #endregion
+
+        #region Hotkeys
+
+        private void tbOutput_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Control)
+            {
+                if (e.KeyCode == Keys.A) // CTRL + A, Select all
+                {
+                    tbOutput.SelectAll();
+                }
+                else if (e.KeyCode == Keys.S) // CTRL + S, Save as
+                {
+                    using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                    {
+                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                        {
+                            File.WriteAllLines(saveFileDialog.FileName, tbOutput.Lines);
+                        }
+                    }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Background Worker
 
         private void ResetCancellationTokenSource()
         {
@@ -126,32 +173,15 @@ namespace MaurerWinform
             cancelSource.Cancel();
         }
 
-        private void DisplayErrorMessage(string message, string caption = "")
-        {
-            MessageBox.Show(message, string.IsNullOrWhiteSpace(caption) ? MessageBoxCaption : caption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-        }
-
-        private void SetButtonText(bool enable, string resetText = "")
-        {
-            if (enable)
-            {
-                btnSearch.Text = resetText;
-            }
-            else
-            {
-                btnSearch.Text = "Cancel";
-            }
-        }
-
         private void FindPrimes_WorkerComplete(object sender, RunWorkerCompletedEventArgs e)
         {
             if (e.Error != null)
             {
-                DisplayErrorMessage(e.Error.ToString(), "Exception Message");
+                WriteMessageBox(e.Error.ToString(), "Exception Message");
             }
             else if (e.Cancelled)
             {
-                WriteOutputLine("Task was canceled.", true);
+                WriteOutputTextboxLine("Task was canceled.", true);
             }
             else
             {
@@ -175,19 +205,19 @@ namespace MaurerWinform
                     );
                 //string bitCountString1 = bitString1.Length.ToString();
                 TimeSpan bitStringTime1 = DateTime.Now.Subtract(bitStringStart1);
-                WriteOutputLine("");
+                WriteOutputTextboxLine("");
 
                 //.... PRINT
-                WriteOutputLine(string.Format("{0} bit prime ({1} digits):", base2size, base10size));
-                WriteOutputLine(primeNumber);
+                WriteOutputTextboxLine(string.Format("{0} bit prime ({1} digits):", base2size, base10size));
+                WriteOutputTextboxLine(primeNumber);
                 //WriteOutputLine(string.Format("Bits ({0}):", log2prime));
                 //WriteOutputLine(bitString1+Environment.NewLine);
 
                 //... Print run/processing time 
                 if (algorithmWorker.RuntimeTimer != null && algorithmWorker.RuntimeTimer != TimeSpan.Zero)
                 {
-                    WriteOutputLine(string.Format("Run time: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(algorithmWorker.RuntimeTimer)));
-                    WriteOutputLine(string.Format("Time to render: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(bitStringTime1)));
+                    WriteOutputTextboxLine(string.Format("Run time: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(algorithmWorker.RuntimeTimer)));
+                    WriteOutputTextboxLine(string.Format("Time to render: {0}", ThreadedAlgorithmWorker.FormatTimeSpan(bitStringTime1)));
                 }
             }
 
@@ -195,48 +225,46 @@ namespace MaurerWinform
             SetButtonText(true, "Search for primes...");
         }
 
-        private void tbOutput_KeyUp(object sender, KeyEventArgs e)
+        #endregion
+
+        #region Form Button Events
+
+        private void btnSearch_Click(object sender, EventArgs e)
         {
-            if (e.Control)
+            //tbOutput.Clear();
+
+            if (IsBusy)
             {
-                if (e.KeyCode == Keys.A) // CTRL + A, Select all
+                CancelBackgroundWorker();
+            }
+            else
+            {
+                IsBusy = true;
+                SetButtonText(false);
+
+                string input = CleanupString(tbInput.Text);
+
+                int bits = 0;
+                if (!int.TryParse(input, out bits))
                 {
-                    tbOutput.SelectAll();
+                    WriteMessageBox("Error parsing number of bits: Try entering only numeric characters into the input TextBox.");
                 }
-                else if (e.KeyCode == Keys.S) // CTRL + S, Save as
+                else if (bits < 7)
                 {
-                    using (SaveFileDialog saveFileDialog = new SaveFileDialog())
-                    {
-                        if (saveFileDialog.ShowDialog() == DialogResult.OK)
-                        {
-                            File.WriteAllLines(saveFileDialog.FileName, tbOutput.Lines);
-                        }
-                    }
+                    WriteMessageBox("If you need to find prime numbers smaller than seven 7 bits, use a non-specialized calculator.");
+                }
+                else
+                {
+                    algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth, Settings.Logging_Enabled);
+                    algorithmWorker.DoWorkFunc = algorithmWorker.DoWork_FindPrime;
+                    algorithmWorker.WorkerComplete += FindPrimes_WorkerComplete;
+
+                    ResetCancellationTokenSource();
+
+                    algorithmWorker.StartWorker(cancelSource.Token, bits);
                 }
             }
         }
-
-        private string StripNonnumericCharacters(string input)
-        {
-            return string.IsNullOrEmpty(input) ? "" : new string(input.Where(c => Numbers.Contains(c)).ToArray());
-        }
-
-        private string CleanupString(string input, bool removeNewlines = true)
-        {
-            string result = input ?? "";
-            if (!string.IsNullOrEmpty(result))
-            {
-                result = result.Trim();        // Trim all leading and trailing whitespace
-                result = result.Replace(",", "");   // Remove any commas, often used as place-value separators (in USA)
-                if (removeNewlines)
-                {
-                    result = result.Replace("\r", "");  // Remove any line-feeds or carriage returns in case
-                    result = result.Replace("\n", ""); //   pasted from shitty text editor with word wrapping
-                }
-            }
-            return result;
-        }
-
 
         //System.Windows.Forms.Timer testPrimalityChecker = new System.Windows.Forms.Timer();
         private void btnTestPrimalityBrowse_Click(object sender, EventArgs e)
@@ -267,18 +295,6 @@ namespace MaurerWinform
             }
         }
 
-
-        private List<string> GetInputLines()
-        {
-            List<string> result = tbInput.Lines.Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => StripNonnumericCharacters(s)).ToList();
-
-            if (tbInput.Lines.Any(s => s.Any(c => !Numbers.Contains(c))))  // Check for non-numerical characters
-            {
-                DisplayErrorMessage("Some lines contain non-numeric characters; these will be stripped out automatically. Please review the output carefully before relying on it.");
-            }
-            return result;
-        }
-
         private void btnTestPrimality_Click(object sender, EventArgs e)
         {
             if (IsBusy)
@@ -286,36 +302,33 @@ namespace MaurerWinform
                 return;
             }
 
-            List<string> inputLines = GetInputLines();
+            List<BigInteger> inputLines = GetInputNumbers();
 
+            int searchDepth = SearchDepth;
             DateTime startTime = DateTime.Now;
-
-            List<Task<bool>> taskQueue = new List<Task<bool>>();
-            foreach (string line in inputLines)
+            List<Task<bool>> taskList = new List<Task<bool>>();
+            foreach (BigInteger number in inputLines)
             {
-                int searchDepth = SearchDepth;
-                BigInteger number = BigInteger.Parse(line);
                 Task<bool> newTask = Task.Run(() => MillerRabin.CompositeTest(number, searchDepth));
-                taskQueue.Add(newTask);
+                taskList.Add(newTask);
             }
 
             IsBusy = true;
-
             tbOutput.Clear();
 
-            Thread compositeTestThread = new Thread(() =>
+            // Thread to gather results
+            new Thread(() =>
             {
-                List<Task<bool>> taskList = new List<Task<bool>>(taskQueue);
+                //List<Task<bool>> taskList = new List<Task<bool>>(taskLis);
                 int counter = 1;
                 foreach (Task<bool> tsk in taskList)
                 {
                     bool result = tsk.Result;
-                    WriteOutputLine(string.Format("#{0}: {1}", counter.ToString().PadRight(3, ' '), result.ToString()));
+                    WriteOutputTextboxLine(string.Format("#{0}: {1}", counter.ToString().PadRight(3, ' '), result.ToString()));
                     counter++;
                 }
                 MainForm.ActiveForm.Invoke(new MethodInvoker(() => IsBusy = false));
-            });
-            compositeTestThread.Start();
+            }).Start();
         }
 
         private void btnMultiply_Click(object sender, EventArgs e)
@@ -323,27 +336,27 @@ namespace MaurerWinform
             tbInput.Text = CleanupString(tbInput.Text, false);
             if (string.IsNullOrWhiteSpace(tbInput.Text))
             {
-                DisplayErrorMessage("Input empty! " + MultiplyInstructions);
+                WriteMessageBox("Input empty! " + MultiplyInstructions);
             }
             else if (tbInput.Text.All(c => !Numbers.Contains(c)))
             {
-                DisplayErrorMessage("No numeric input detected! " + MultiplyInstructions);
+                WriteMessageBox("No numeric input detected! " + MultiplyInstructions);
             }
             else
             {
-                List<BigInteger> numbers = tbInput.Lines.Where(s => !string.IsNullOrWhiteSpace(new string(s.Trim().Where(c => Numbers.Contains(c)).ToArray()))).Select( s => BigInteger.Parse(s)).ToList();
+                List<BigInteger> numbers = GetInputNumbers();
 
                 if (numbers.Count < 2)
                 {
-                    DisplayErrorMessage("Need at least two numbers to perform the binary operation, multiplication. " + MultiplyInstructions);
+                    WriteMessageBox("Need at least two numbers to perform the binary operation, multiplication. " + MultiplyInstructions);
                     return;
                 }
 
                 BigInteger a = BigInteger.MinusOne;
-                BigInteger b = BigInteger.MinusOne;                
+                BigInteger b = BigInteger.MinusOne;
                 BigInteger result = BigInteger.MinusOne;
-                    
-                a = numbers.First();                
+
+                a = numbers.First();
                 numbers.Remove(a);
 
                 while (numbers.Any())
@@ -353,10 +366,10 @@ namespace MaurerWinform
 
                     result = BigInteger.Multiply(a, b);
 
-                    a = result;                    
+                    a = result;
                 }
 
-                WriteOutputLine(string.Format("=\n{0}", result.ToString()), true);
+                WriteOutputTextboxLine(string.Format("=\n{0}", result.ToString()), true);
             }
         }
 
@@ -381,15 +394,13 @@ namespace MaurerWinform
                 return;
             }
 
-            List<string> inputLines = GetInputLines();
-
             string[] fileLines = File.ReadAllLines(filename);
             if (fileLines == null || fileLines.Length < 1)
             {
                 return;
             }
 
-            List<BigInteger> dividends = inputLines.Select(s => BigInteger.Parse(StripNonnumericCharacters(s))).ToList();
+            List<BigInteger> dividends = GetInputNumbers();
             IEnumerable<BigInteger> divisors = fileLines.Select(s => BigInteger.Parse(StripNonnumericCharacters(s)));
 
             BigInteger quotient = new BigInteger();
@@ -403,7 +414,7 @@ namespace MaurerWinform
 
                     if (remainder == BigInteger.Zero)
                     {
-                        WriteOutputLine(string.Format("{0} / {1} = {2}", dividend, divisor, quotient));
+                        WriteOutputTextboxLine(string.Format("{0} / {1} = {2}", dividend, divisor, quotient));
                     }
                     //else
                     //{
@@ -412,7 +423,96 @@ namespace MaurerWinform
                 }
             }
 
-            WriteOutputLine("--- END ---");
+            WriteOutputTextboxLine(FinishMessage);
         }
+
+        private static int lower = 2;
+        private static int quantityPerRound = 10000000; // Ten million
+        private int upper = lower + quantityPerRound;
+        private bool isPrimesRunning = false;
+        private CancellationTokenSource primesCancellationTokenSource;
+
+        private void btnDumpPrimes_Click(object sender, EventArgs e)
+        {
+            if (isPrimesRunning)
+            {
+                primesCancellationTokenSource.Cancel();
+            }
+            else
+            {
+                string filename = "";
+                using (SaveFileDialog fileDialog = new SaveFileDialog())
+                {
+                    if (fileDialog.ShowDialog() == DialogResult.OK)
+                    {
+                        filename = fileDialog.FileName;
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(filename))
+                {
+                    return;
+                }
+
+                isPrimesRunning = true;
+                btnDumpPrimes.Text = "Stop";
+                primesCancellationTokenSource = new CancellationTokenSource();
+
+                CancellationToken cancelToken = primesCancellationTokenSource.Token;
+
+                new Thread(() =>
+                {
+                    while (!cancelToken.IsCancellationRequested)
+                    {
+                        List<long> primes = Eratosthenes.Sieve(lower, upper);
+
+                        File.AppendAllText(filename, string.Join(Environment.NewLine, primes.Select(l => l.ToString())));
+
+                        primes.Clear();
+
+                        lower = upper + 1;
+                        upper = lower + quantityPerRound;
+                    }
+
+                    DumpPrimesCleanup();
+                    WriteOutputTextboxLine(FinishMessage);
+
+                }).Start();
+            }
+        }
+
+        private void DumpPrimesCleanup()
+        {
+            isPrimesRunning = false;
+            btnDumpPrimes.Invoke(new MethodInvoker(() => { btnDumpPrimes.Text = "Dump primes..."; }));
+
+            if (primesCancellationTokenSource != null)
+            {
+                primesCancellationTokenSource.Dispose();
+                primesCancellationTokenSource = null;
+            }
+        }
+
+        private void WritePrimesAsBytes(List<long> primes, string filename)
+        {
+            File.WriteAllBytes(filename, primes.SelectMany(l => BitConverter.GetBytes(l)).ToArray());
+        }
+
+        private List<long> ReadPrimesAsBytes(string filename)
+        {
+            List<long> result = new List<long>();
+            using (BinaryReader reader = new BinaryReader(File.Open(filename, FileMode.Open)))
+            {
+                while (reader.BaseStream.Position != reader.BaseStream.Length)
+                {         
+                    result.Add(reader.ReadInt64());              
+                }
+            }
+            return result;
+        }
+
+        #endregion
+
+
     }
 }

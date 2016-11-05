@@ -41,6 +41,7 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.panel2 = new System.Windows.Forms.Panel();
             this.panel3 = new System.Windows.Forms.Panel();
+            this.btnDumpPrimes = new System.Windows.Forms.Button();
             this.btnDivide = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
@@ -69,7 +70,7 @@
             this.tbOutput.Multiline = true;
             this.tbOutput.Name = "tbOutput";
             this.tbOutput.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.tbOutput.Size = new System.Drawing.Size(717, 294);
+            this.tbOutput.Size = new System.Drawing.Size(717, 277);
             this.tbOutput.TabIndex = 1;
             this.tbOutput.WordWrap = false;
             this.tbOutput.KeyUp += new System.Windows.Forms.KeyEventHandler(this.tbOutput_KeyUp);
@@ -84,7 +85,7 @@
             this.tbInput.Multiline = true;
             this.tbInput.Name = "tbInput";
             this.tbInput.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbInput.Size = new System.Drawing.Size(598, 84);
+            this.tbInput.Size = new System.Drawing.Size(598, 103);
             this.tbInput.TabIndex = 2;
             this.tbInput.Text = "2048";
             // 
@@ -92,7 +93,7 @@
             // 
             this.btnPrimalityTest.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnPrimalityTest.Location = new System.Drawing.Point(2, 86);
+            this.btnPrimalityTest.Location = new System.Drawing.Point(2, 108);
             this.btnPrimalityTest.Name = "btnPrimalityTest";
             this.btnPrimalityTest.Size = new System.Drawing.Size(110, 37);
             this.btnPrimalityTest.TabIndex = 3;
@@ -116,7 +117,7 @@
             // 
             this.btnTrialDivisionBrowse.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTrialDivisionBrowse.Location = new System.Drawing.Point(2, 65);
+            this.btnTrialDivisionBrowse.Location = new System.Drawing.Point(2, 87);
             this.btnTrialDivisionBrowse.Name = "btnTrialDivisionBrowse";
             this.btnTrialDivisionBrowse.Size = new System.Drawing.Size(110, 22);
             this.btnTrialDivisionBrowse.TabIndex = 10;
@@ -146,7 +147,7 @@
             // tbSearchDepth
             // 
             this.tbSearchDepth.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.tbSearchDepth.Location = new System.Drawing.Point(563, 104);
+            this.tbSearchDepth.Location = new System.Drawing.Point(563, 123);
             this.tbSearchDepth.Name = "tbSearchDepth";
             this.tbSearchDepth.Size = new System.Drawing.Size(41, 20);
             this.tbSearchDepth.TabIndex = 8;
@@ -156,7 +157,7 @@
             this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Consolas", 8F, System.Drawing.FontStyle.Bold);
-            this.label3.Location = new System.Drawing.Point(380, 108);
+            this.label3.Location = new System.Drawing.Point(380, 127);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(181, 13);
             this.label3.TabIndex = 9;
@@ -170,9 +171,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.Controls.Add(this.label2);
             this.panel1.Controls.Add(this.tbOutput);
-            this.panel1.Location = new System.Drawing.Point(3, 135);
+            this.panel1.Location = new System.Drawing.Point(3, 152);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(723, 317);
+            this.panel1.Size = new System.Drawing.Size(723, 300);
             this.panel1.TabIndex = 13;
             // 
             // panel2
@@ -185,12 +186,13 @@
             this.panel2.Controls.Add(this.label3);
             this.panel2.Location = new System.Drawing.Point(3, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(607, 126);
+            this.panel2.Size = new System.Drawing.Size(607, 145);
             this.panel2.TabIndex = 14;
             // 
             // panel3
             // 
             this.panel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel3.Controls.Add(this.btnDumpPrimes);
             this.panel3.Controls.Add(this.btnDivide);
             this.panel3.Controls.Add(this.btnPrimalityTest);
             this.panel3.Controls.Add(this.btnSearch);
@@ -198,8 +200,19 @@
             this.panel3.Controls.Add(this.btnMultiply);
             this.panel3.Location = new System.Drawing.Point(612, 3);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(114, 126);
+            this.panel3.Size = new System.Drawing.Size(114, 148);
             this.panel3.TabIndex = 15;
+            // 
+            // btnDumpPrimes
+            // 
+            this.btnDumpPrimes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDumpPrimes.Location = new System.Drawing.Point(2, 65);
+            this.btnDumpPrimes.Name = "btnDumpPrimes";
+            this.btnDumpPrimes.Size = new System.Drawing.Size(110, 22);
+            this.btnDumpPrimes.TabIndex = 12;
+            this.btnDumpPrimes.Text = "Dump primes...";
+            this.btnDumpPrimes.Click += new System.EventHandler(this.btnDumpPrimes_Click);
             // 
             // btnDivide
             // 
@@ -249,5 +262,6 @@
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Button btnDivide;
+        private System.Windows.Forms.Button btnDumpPrimes;
     }
 }
