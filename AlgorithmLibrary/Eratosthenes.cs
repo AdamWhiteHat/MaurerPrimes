@@ -19,20 +19,20 @@ namespace AlgorithmLibrary
 			executionTimer = new AggregateTimer();
 		}
 
-        /// <summary>
-        /// Sieve of Eratosthenes. Find all prime numbers less than or equal ceiling
-        /// </summary>
-        public static List<long> Sieve(long ceiling)
-        {
-            return Sieve(2, ceiling);
-        }
-
-        public static List<long> Sieve(int floor, long ceiling)
+		/// <summary>
+		/// Sieve of Eratosthenes. Find all prime numbers less than or equal ceiling
+		/// </summary>
+		public static List<long> Sieve(long ceiling)
 		{
-            if(floor < 2)
-            {
-                floor = 2;
-            }
+			return Sieve(2, ceiling);
+		}
+
+		public static List<long> Sieve(int floor, long ceiling)
+		{
+			if(floor < 2)
+			{
+				floor = 2;
+			}
 			using (executionTimer.StartTimer())
 			{
 				Log.MethodEnter("Eratosthenes.Sieve", ceiling);
@@ -56,15 +56,15 @@ namespace AlgorithmLibrary
 				long sqrt = 3;
 				bool[] primeMembershipArray = new bool[ceiling + 1];
 
-                if (longestprimeMembershipArray.Count > counterStart /*&& longestprimeMembershipArray.Length < ceiling+1*/)
-                {
-                    Array.ConstrainedCopy(longestprimeMembershipArray.ToArray(), 0, primeMembershipArray, 0, (int)Math.Min(longestprimeMembershipArray.Count, ceiling + 1));
-                    //counterStart = longestprimeMembershipArray.Count - 2;
-                }
-            
-                    primeMembershipArray[2] = true;
-                                
-                // Set all odds as true
+				if (longestprimeMembershipArray.Count > counterStart /*&& longestprimeMembershipArray.Length < ceiling+1*/)
+				{
+					Array.ConstrainedCopy(longestprimeMembershipArray.ToArray(), 0, primeMembershipArray, 0, (int)Math.Min(longestprimeMembershipArray.Count, ceiling + 1));
+					//counterStart = longestprimeMembershipArray.Count - 2;
+				}
+			
+					primeMembershipArray[2] = true;
+								
+				// Set all odds as true
 				for (counter = counterStart; counter <= ceiling; counter += 2)
 				{
 					if ((counter & 1) == 1)//% 2 == 1) // Check if odd
@@ -77,8 +77,8 @@ namespace AlgorithmLibrary
 				{
 					counter = sqrt * sqrt;
 					inc = sqrt + sqrt;
-                                       
-                    while (counter <= ceiling)
+									   
+					while (counter <= ceiling)
 					{
 						primeMembershipArray[counter] = false;
 						counter += inc;
@@ -93,7 +93,7 @@ namespace AlgorithmLibrary
 				} while (sqrt * sqrt <= ceiling);
 
 
-                List<long> result = Enumerable.Range(2, (int)ceiling - 2).Select(n => (long)n).Where(l => l >= floor && primeMembershipArray[l]).ToList();
+				List<long> result = Enumerable.Range(2, (int)ceiling - 2).Select(n => (long)n).Where(l => l >= floor && primeMembershipArray[l]).ToList();
 
 				if (result.Count > longestSieve.Count)
 				{

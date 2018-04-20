@@ -3,6 +3,7 @@ using System.Numerics;
 using System.Threading;
 using System.Collections.Generic;
 using AlgorithmLibrary;
+using System.Diagnostics;
 
 namespace MaurerConsole
 {
@@ -29,6 +30,9 @@ namespace MaurerConsole
 		private Queue<BigInteger> primes;
 		private Queue<WorkerResultType> results;
 
+		private Stopwatch primeFindTimer;
+		public TimeSpan primeFindTimeElapsed;
+
 		public ConsoleWorker(bool loggingEnabled)
 		{
 			errors = new Queue<Exception>();
@@ -42,6 +46,8 @@ namespace MaurerConsole
 			algorithmWorker.WorkerComplete += algorithmWorker_WorkerComplete;
 			
 			this.RunTime = algorithmWorker.RuntimeTimer;
+
+			primeFindTimer = new Stopwatch();
 		}
 
 		public Exception RemoveErrorResult()
@@ -100,18 +106,28 @@ namespace MaurerConsole
 				}
 				if (cancelSource == null)
 				{
-					cancelSource = new CancellationTokenSource();
-					cancelToken = cancelSource.Token;
+					NewCancelTokenAndSource();
 				}
 
+				primeFindTimer.Reset();
+				primeFindTimer.Start();
 				algorithmWorker.StartWorker(cancelToken, primeBitSize);
 				return true;
 			}
 			return false;
 		}
 
+		private void NewCancelTokenAndSource()
+		{
+			cancelSource = new CancellationTokenSource();
+			cancelToken = cancelSource.Token;
+		}
+
 		private void algorithmWorker_WorkerComplete(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
 		{
+			primeFindTimer.Stop();
+			primeFindTimeElapsed = primeFindTimer.Elapsed;
+
 			if (e.Error != null)
 			{
 				this.errors.Enqueue(e.Error);

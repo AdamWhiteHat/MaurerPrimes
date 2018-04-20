@@ -46,12 +46,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Algorithm.cs" />
+    <Compile Include="BigPrime.cs" />
+    <Compile Include="CryptographicPrimeGenerator.cs" />
     <Compile Include="CryptoRandomSingleton.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="MillerRabin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sieve.cs" />
+    <Compile Include="Eratosthenes.cs" />
     <Compile Include="ThreadedAlgorithmWorker.cs" />
     <Compile Include="AggregateTimer.cs" />
     <Compile Include="TrialDivision.cs" />

@@ -9,14 +9,14 @@ namespace AlgorithmLibrary
 	public delegate void LogMethodDelegate(string message);
 	public delegate void ReportProgressMethodDelegate();
 
-	public class Algorithm : IDisposable
+	public class CryptographicPrimeGenerator : IDisposable
 	{
 		public static readonly BigInteger Two = new BigInteger(2);
 
 		private bool IsDisposed = false;
 		private CancellationToken cancelToken;
 
-		public Algorithm(CancellationToken cancellationToken, bool loggingEnabled = false)
+		public CryptographicPrimeGenerator(CancellationToken cancellationToken, bool loggingEnabled = false)
 		{
 			disposeCheck();
 			cancelToken = new CancellationToken();
@@ -54,16 +54,16 @@ namespace AlgorithmLibrary
 		/// <summary>
 		/// Returns a probable prime of size bits and will search n rounds for a composite
 		/// </summary>
-		/// <param name="bits">Size of prime, in bits</param>
-		/// <param name="compositeSearchRounds">Quantity of rounds to search for composites as evidence of primality</param>
+		/// <param name="bitSize">Size of prime, in bits</param>
+		/// <param name="testCount">Number of different bases to use when testing probable prime  for composites as evidence of primality</param>
 		/// <returns></returns>
-		public BigInteger ProvablePrime(int bits, int compositeSearchRounds)
+		public BigInteger GetProbablePrime(int bitSize, int testCount)
 		{
 			disposeCheck();
 			BigInteger result = 0;
 
 			Console.Write(".");
-			Log.MethodEnter("ProvablePrime", bits);
+			Log.MethodEnter("ProvablePrime", bitSize);
 
 
 			if (cancelToken.IsCancellationRequested)
@@ -73,10 +73,10 @@ namespace AlgorithmLibrary
 				return -1;
 			}
 
-			if (bits <= 20)
+			if (bitSize <= 20)
 			{
 				Log.Message("***MAXIMUM RECURSION DEPT REACHED");
-				result = TrialDivision.FindSmallPrimes(bits);
+				result = TrialDivision.FindSmallPrimes(bitSize);
 				Log.Message("***Hopeful prime: {0}", result);
 			}
 			else
@@ -86,7 +86,7 @@ namespace AlgorithmLibrary
 				int m = 20;
 				double r = 0.5;
 
-				if (bits > 2 * m)
+				if (bitSize > 2 * m)
 				{
 					double rnd = 0;
 					done = false;
@@ -94,13 +94,13 @@ namespace AlgorithmLibrary
 					{
 						rnd = CryptoRandomSingleton.NextDouble();
 						r = Math.Pow(2, rnd - 1);
-						done = (bits - r * bits) > m;
+						done = (bitSize - r * bitSize) > m;
 					}
 				}
 
-				int newBits = (int)Math.Floor(r * bits) + 1;
+				int newBits = (int)Math.Floor(r * bitSize) + 1;
 
-				BigInteger smallPrime = ProvablePrime(newBits, compositeSearchRounds);
+				BigInteger smallPrime = GetProbablePrime(newBits, testCount);
 
 				if (smallPrime == -1)
 				{
@@ -109,11 +109,11 @@ namespace AlgorithmLibrary
 				}
 				Log.Message("After Recursion: Length = {0}", smallPrime.ToString().Length);
 
-				BigInteger pow = BigInteger.Pow(Two, bits - 1);
+				BigInteger pow = BigInteger.Pow(Two, bitSize - 1);
 				BigInteger Q = Two * smallPrime;
 				BigInteger I = pow / Q;
 
-				long sieveMax = (long)(c * bits * bits);
+				long sieveMax = (long)(c * bitSize * bitSize);
 				List<long> primes = Eratosthenes.Sieve(sieveMax);
 
 				bool success = false;
@@ -146,7 +146,7 @@ namespace AlgorithmLibrary
 					if (!done)
 					{
 						//LogMethod("ProvablePrime.RandomRange(J: {0}, K: {1}) = {2}", J, K, rand1);
-						if (MillerRabin.CompositeTest(result, compositeSearchRounds))
+						if (MillerRabin.IsProbablyPrime(result, testCount))
 						{
 							success = true;
 							string cert = MillerRabin.GetCertificateOfPrimality(result, rand1);

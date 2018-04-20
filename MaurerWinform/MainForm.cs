@@ -189,7 +189,7 @@ namespace MaurerWinform
 
                 string primeNumber = prime1.ToString();
                 string base10size = (Math.Round(BigInteger.Log10(prime1))).ToString("F0");
-                string base2size = (Math.Round(Algorithm.Log2(prime1))).ToString("F0");
+                string base2size = (Math.Round(CryptographicPrimeGenerator.Log2(prime1))).ToString("F0");
 
                 //.... Print bit array
                 DateTime bitStringStart1 = DateTime.Now;
@@ -287,7 +287,7 @@ namespace MaurerWinform
             {
                 BigInteger temp = BigInteger.Parse(line);
 
-                bool isPrime = MillerRabin.CompositeTest(temp, SearchDepth);
+                bool isPrime = MillerRabin.IsProbablyPrime(temp, SearchDepth);
 
                 tbOutput.AppendText(string.Format("Line #{0} : {1}{2}", counter.ToString().PadRight(4, ' '), isPrime ? "Prime" : "Composite", Environment.NewLine));
 
@@ -309,7 +309,7 @@ namespace MaurerWinform
             List<Task<bool>> taskList = new List<Task<bool>>();
             foreach (BigInteger number in inputLines)
             {
-                Task<bool> newTask = Task.Run(() => MillerRabin.CompositeTest(number, searchDepth));
+                Task<bool> newTask = Task.Run(() => MillerRabin.IsProbablyPrime(number, searchDepth));
                 taskList.Add(newTask);
             }
 
@@ -327,7 +327,7 @@ namespace MaurerWinform
                     WriteOutputTextboxLine(string.Format("#{0}: {1}", counter.ToString().PadRight(3, ' '), result.ToString()));
                     counter++;
                 }
-                MainForm.ActiveForm.Invoke(new MethodInvoker(() => IsBusy = false));
+                this.Invoke(new MethodInvoker(() => IsBusy = false));
             }).Start();
         }
 

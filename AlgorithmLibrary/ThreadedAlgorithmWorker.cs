@@ -19,7 +19,7 @@ namespace AlgorithmLibrary
 		public int CompositeSearchDepth { get; set; } = 4;
 
 		private DateTime startTime;
-		private Algorithm algorithm;
+		private CryptographicPrimeGenerator algorithm;
 		private BackgroundWorker bgWorker;
 		private CancellationToken cancelToken;
 		private bool LoggingEnabled;
@@ -60,8 +60,8 @@ namespace AlgorithmLibrary
 
 		public BigInteger DoWork_FindPrime(CancellationToken token, object argument)
 		{
-			algorithm = new Algorithm(token, LoggingEnabled);
-			return algorithm.ProvablePrime((int)argument, CompositeSearchDepth);
+			algorithm = new CryptographicPrimeGenerator(token, LoggingEnabled);
+			return algorithm.GetProbablePrime((int)argument, CompositeSearchDepth);
 		}
 
 		private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -123,7 +123,7 @@ namespace AlgorithmLibrary
 				}
 				result.Append("s");
 			}
-						
+
 			return result.ToString();
 		}
 	}

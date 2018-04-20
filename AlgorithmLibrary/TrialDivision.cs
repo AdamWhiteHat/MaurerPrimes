@@ -37,8 +37,8 @@ namespace AlgorithmLibrary
 					}
 
 					upperBound = (long)Math.Sqrt(n);
-					lucky = Eratosthenes.Sieve(upperBound);					
-					composite = lucky.Any(l => n % l == 0);
+					lucky = Eratosthenes.Sieve(upperBound);
+					composite = lucky.Any(l => ((n % l) == 0));
 
 					if (!composite)
 					{
@@ -49,6 +49,25 @@ namespace AlgorithmLibrary
 				Log.MethodLeave();
 				return result;
 			}
+		}
+
+		public static BigInteger GCD(BigInteger value1, BigInteger value2)
+		{
+			BigInteger absValue1 = BigInteger.Abs(value1);
+			BigInteger absValue2 = BigInteger.Abs(value2);
+
+			while (absValue1 != 0 && absValue2 != 0)
+			{
+				if (absValue1 > absValue2)
+				{
+					absValue1 %= absValue2;
+				}
+				else
+				{
+					absValue2 %= absValue1;
+				}
+			}
+			return BigInteger.Max(absValue1, absValue2);
 		}
 	}
 }

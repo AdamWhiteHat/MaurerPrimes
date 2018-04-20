@@ -91,9 +91,12 @@ namespace AlgorithmLibrary
 			}
 		}
 
+		/// <summary>
+		/// Generates a random number uniformly distributed over the entire range 
+		/// </summary>
 		public static BigInteger RandomRange(BigInteger lower, BigInteger upper)
 		{
-			if (lower > upper) { throw new ArgumentOutOfRangeException("Upper must be greater than upper"); }
+			if (lower > upper) { throw new ArgumentOutOfRangeException("Upper must be greater than lower"); }
 
 			// long implementation
 			if (lower <= long.MaxValue && upper <= long.MaxValue)
@@ -122,9 +125,12 @@ namespace AlgorithmLibrary
 			}
 		}
 
+		/// <summary>
+		/// Generates a random number uniformly distributed over an entire range of arbitrary size
+		/// </summary>
 		private static BigInteger RandomRangeBigInteger(BigInteger lower, BigInteger upper)
 		{
-			if (lower > upper) { throw new ArgumentOutOfRangeException("Upper must be greater than upper"); }
+			if (lower > upper) { throw new ArgumentOutOfRangeException("Upper must be greater than lower"); }
 
 			BigInteger delta = upper - lower;
 			byte[] deltaBytes = delta.ToByteArray();
