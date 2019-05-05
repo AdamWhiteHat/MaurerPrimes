@@ -1,8 +1,8 @@
 /*
  *
- * Developed by Adam Rakaska
- *  http://www.csharpprogramming.tips
- *    http://arakaska.wix.com/intelligentsoftware
+ * Developed by Adam White
+ *  https://csharpcodewhisperer.blogspot.com
+ *    http://aWhite.wix.com/intelligentsoftware
  * 
  */
 using System;

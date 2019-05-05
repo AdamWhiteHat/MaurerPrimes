@@ -1,4 +1,4 @@
 # MaurerPrimes
 Maurer fast prime finding algorithm
 
-![alt text](https://github.com/AdamRakaska/MaurerPrimes/blob/master/MaurerPrimes.PNG "BloomFilter Screenshot")
+![alt text](https://github.com/AdamWhiteHat/MaurerPrimes/blob/master/MaurerPrimes.PNG "BloomFilter Screenshot")
