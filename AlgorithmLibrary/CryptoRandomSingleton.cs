@@ -24,6 +24,16 @@ namespace AlgorithmLibrary
 			rng = new RNGCryptoServiceProvider();
 		}
 
+		public static void Dispose()
+		{
+			if (rng != null)
+			{
+				rng.Dispose();
+				rng = null;
+				rng = new RNGCryptoServiceProvider();
+			}
+		}
+
 		private static void ClearBuffer(byte[] buffer)
 		{
 			if (buffer != null)
@@ -35,16 +45,6 @@ namespace AlgorithmLibrary
 					counter--;
 				}
 				counter = 0;
-			}
-		}
-
-		public static void Dispose()
-		{
-			if (rng != null)
-			{
-				rng.Dispose();
-				rng = null;
-				rng = new RNGCryptoServiceProvider();
 			}
 		}
 

@@ -18,26 +18,26 @@ namespace AlgorithmLibrary
 			FullTestCount = 9;
 		}
 
-		public BigInteger GetNextPrime(BigInteger fromValue)
+		public static BigInteger GetNextPrime(BigInteger fromValue)
 		{
 			bool isPrime = false;
-			BigInteger currentValue = fromValue%2==0 ? fromValue+1 : fromValue+2;
+			BigInteger currentValue = fromValue % 2 == 0 ? fromValue + 1 : fromValue + 2;
 			while (!isPrime)
 			{
 				isPrime = MillerRabin.IsProbablyPrime(currentValue, QuickTestCount); // Test just a few bases here, as a quick elimination test
 
-				if(isPrime)
+				if (isPrime)
 				{
 					isPrime = MillerRabin.IsProbablyPrime(currentValue, FullTestCount); // Test more bases here to ensure candidate is really prime
 				}
 
-				currentValue+=2;
+				currentValue += 2;
 			}
 
 			return BigInteger.MinusOne;
 		}
 
-		public BigInteger GetPreviousPrime(BigInteger fromValue)
+		public static BigInteger GetPreviousPrime(BigInteger fromValue)
 		{
 			bool isPrime = false;
 			BigInteger currentValue = fromValue % 2 == 0 ? fromValue - 1 : fromValue - 2;
@@ -45,13 +45,13 @@ namespace AlgorithmLibrary
 			{
 
 
-				currentValue+=2;
+				currentValue += 2;
 			}
 
 			return BigInteger.MinusOne;
 		}
 
-		private bool TestForPrimality(BigInteger testValue)
+		private static bool TestForPrimality(BigInteger testValue)
 		{
 			bool result = MillerRabin.IsProbablyPrime(testValue, QuickTestCount); // Test just a few bases here, as a quick elimination test
 

@@ -12,11 +12,11 @@ namespace MaurerWinform
 		/// </summary>
 		[STAThread]
 		static internal void Main()
-		{			
+		{
 			Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			//AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
-			Application.Run(new MainForm());		
+			AppDomain.CurrentDomain.FirstChanceException += CurrentDomain_FirstChanceException;
+			Application.Run(new MainForm());
 		}
 
 		static void CurrentDomain_FirstChanceException(object sender, FirstChanceExceptionEventArgs e)

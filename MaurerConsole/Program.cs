@@ -93,12 +93,12 @@ namespace MaurerConsole
 			if (!string.IsNullOrWhiteSpace(Settings.LogFile_Timers))
 			{
 				WriteLogFile(Settings.LogFile_Timers, "Prime bit size: " + primeBitSize);
-				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.OutsideExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.OutsideExecutionTime));
-				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.InsideExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(MillerRabin.InsideExecutionTime));
-				WriteLogFile(Settings.LogFile_Timers, "Log.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Log.TotalExecutionTime));
-				WriteLogFile(Settings.LogFile_Timers, "Eratosthenes.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(Eratosthenes.TotalExecutionTime));
-				WriteLogFile(Settings.LogFile_Timers, "TrialDivision.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(TrialDivision.TotalExecutionTime));
-				WriteLogFile(Settings.LogFile_Timers, "CryptoRandomSingleton.TotalExecutionTime: " + ThreadedAlgorithmWorker.FormatTimeSpan(CryptoRandomSingleton.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.OutsideExecutionTime: " + AggregateTimer.FormatTimeSpan(MillerRabin.OutsideExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "MillerRabin.InsideExecutionTime: " + AggregateTimer.FormatTimeSpan(MillerRabin.InsideExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "Log.TotalExecutionTime: " + AggregateTimer.FormatTimeSpan(Log.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "Eratosthenes.TotalExecutionTime: " + AggregateTimer.FormatTimeSpan(Eratosthenes.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "TrialDivision.TotalExecutionTime: " + AggregateTimer.FormatTimeSpan(TrialDivision.TotalExecutionTime));
+				WriteLogFile(Settings.LogFile_Timers, "CryptoRandomSingleton.TotalExecutionTime: " + AggregateTimer.FormatTimeSpan(CryptoRandomSingleton.TotalExecutionTime));
 				WriteLogFile(Settings.LogFile_Timers, Environment.NewLine);
 			}
 
@@ -155,7 +155,7 @@ namespace MaurerConsole
 				string log10prime = (Math.Round(BigInteger.Log10(prime))).ToString("F0");
 				string log2prime = (Math.Round(CryptographicPrimeGenerator.Log2(prime))).ToString("F0");
 
-				Console.WriteLine("] {0} (time elapsed)", ThreadedAlgorithmWorker.FormatTimeSpan(timeElapsed));
+				Console.WriteLine("] {0} (time elapsed)", AggregateTimer.FormatTimeSpan(timeElapsed));
 				Console.WriteLine();
 				Console.WriteLine(" OUTPUT:  ..\\{0}", Settings.LogFile_Primes.ToUpperInvariant());
 

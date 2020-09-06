@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 
 namespace AlgorithmLibrary
 {
-	public class ThreadedAlgorithmWorker
+	public class ThreadedAlgorithmWorker : IDisposable
 	{
+		public bool IsDisposed = false;
 		public object Argument { get; private set; }
 		public BigInteger Result { get; private set; }
 		public TimeSpan RuntimeTimer { get; private set; }
@@ -28,11 +29,32 @@ namespace AlgorithmLibrary
 		{
 			RuntimeTimer = TimeSpan.Zero;
 			CompositeSearchDepth = compositeSearchDepth;
-			bgWorker = new BackgroundWorker();
-			bgWorker.DoWork += bgWorker_DoWork;
-			bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
-			bgWorker.WorkerSupportsCancellation = true;
 			this.LoggingEnabled = loggingEnabled;
+		}
+
+		public void Dispose()
+		{
+			if (!IsDisposed)
+			{
+				IsDisposed = true;
+
+				if (bgWorker != null)
+				{
+					bgWorker.DoWork -= bgWorker_DoWork;
+					bgWorker.RunWorkerCompleted -= bgWorker_RunWorkerCompleted;
+					bgWorker.Dispose();
+				}
+
+				if (DoWorkFunc != null)
+				{
+					DoWorkFunc = null;
+				}
+
+				if (Argument != null)
+				{
+					Argument = null;
+				}
+			}
 		}
 
 		public void StartWorker(CancellationToken cancellationToken, object argument)
@@ -43,25 +65,14 @@ namespace AlgorithmLibrary
 			}
 			Argument = argument;
 
+			bgWorker = new BackgroundWorker();
+			bgWorker.WorkerSupportsCancellation = true;
+			bgWorker.DoWork += bgWorker_DoWork;
+			bgWorker.RunWorkerCompleted += bgWorker_RunWorkerCompleted;
+
 			startTime = new DateTime();
 			startTime = DateTime.Now;
 			bgWorker.RunWorkerAsync(Argument);
-		}
-
-		private void OnWorkerComplete(object result, Exception error, bool cancelled)
-		{
-			RunWorkerCompletedEventHandler handler = WorkerComplete;
-			if (handler != null)
-			{
-				RunWorkerCompletedEventArgs args = new RunWorkerCompletedEventArgs(result, error, cancelled);
-				handler(this, args);
-			}
-		}
-
-		public BigInteger DoWork_FindPrime(CancellationToken token, object argument)
-		{
-			algorithm = new CryptographicPrimeGenerator(token, LoggingEnabled);
-			return algorithm.GetProbablePrime((int)argument, CompositeSearchDepth);
 		}
 
 		private void bgWorker_DoWork(object sender, DoWorkEventArgs e)
@@ -76,6 +87,12 @@ namespace AlgorithmLibrary
 			{
 				e.Result = Result;
 			}
+		}
+
+		public BigInteger DoWork_FindPrime(CancellationToken token, object argument)
+		{
+			algorithm = new CryptographicPrimeGenerator(token, LoggingEnabled);
+			return algorithm.GetProbablePrime((int)argument, CompositeSearchDepth);
 		}
 
 		private void bgWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -93,38 +110,16 @@ namespace AlgorithmLibrary
 			{
 				OnWorkerComplete(e.Result, e.Error, e.Cancelled);
 			}
-			if (algorithm != null)
-			{
-				algorithm.Dispose();
-			}
 		}
 
-		public static string FormatTimeSpan(TimeSpan timeSpan)
+		private void OnWorkerComplete(object result, Exception error, bool cancelled)
 		{
-			if (timeSpan.TotalMilliseconds < 1)
+			RunWorkerCompletedEventHandler handler = WorkerComplete;
+			if (handler != null)
 			{
-				return "0.0";
+				RunWorkerCompletedEventArgs args = new RunWorkerCompletedEventArgs(result, error, cancelled);
+				handler(this, args);
 			}
-			if (timeSpan.TotalMilliseconds < 1000)
-			{
-				return string.Concat(timeSpan.Milliseconds.ToString().PadLeft(3), "ms ");
-			}
-
-			StringBuilder result = new StringBuilder();
-			if (timeSpan.Days > 0) { result.Append(timeSpan.Days.ToString().PadLeft(2)).Append("d "); }
-			if (timeSpan.Hours > 0) { result.Append(timeSpan.Hours.ToString().PadLeft(2)).Append("h "); }
-			if (timeSpan.Minutes > 0) { result.Append(timeSpan.Minutes.ToString().PadLeft(2)).Append("m "); }
-			if (timeSpan.Seconds > 0)
-			{
-				result.Append(timeSpan.Seconds.ToString().PadLeft(2));
-				if (timeSpan.Milliseconds > 0)
-				{
-					result.AppendFormat(".{0}", timeSpan.Milliseconds.ToString().PadLeft(3, '0').Substring(0, 1));
-				}
-				result.Append("s");
-			}
-
-			return result.ToString();
 		}
 	}
 }

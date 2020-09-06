@@ -11,7 +11,7 @@ namespace AlgorithmLibrary
 
 		private static List<long> longestSieve;
 		private static List<bool> longestprimeMembershipArray;
-		
+
 		static Eratosthenes()
 		{
 			longestSieve = new List<long>();
@@ -29,7 +29,7 @@ namespace AlgorithmLibrary
 
 		public static List<long> Sieve(int floor, long ceiling)
 		{
-			if(floor < 2)
+			if (floor < 2)
 			{
 				floor = 2;
 			}
@@ -61,9 +61,9 @@ namespace AlgorithmLibrary
 					Array.ConstrainedCopy(longestprimeMembershipArray.ToArray(), 0, primeMembershipArray, 0, (int)Math.Min(longestprimeMembershipArray.Count, ceiling + 1));
 					//counterStart = longestprimeMembershipArray.Count - 2;
 				}
-			
-					primeMembershipArray[2] = true;
-								
+
+				primeMembershipArray[2] = true;
+
 				// Set all odds as true
 				for (counter = counterStart; counter <= ceiling; counter += 2)
 				{
@@ -77,7 +77,7 @@ namespace AlgorithmLibrary
 				{
 					counter = sqrt * sqrt;
 					inc = sqrt + sqrt;
-									   
+
 					while (counter <= ceiling)
 					{
 						primeMembershipArray[counter] = false;

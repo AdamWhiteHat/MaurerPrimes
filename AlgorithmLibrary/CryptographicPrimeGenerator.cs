@@ -9,7 +9,7 @@ namespace AlgorithmLibrary
 	public delegate void LogMethodDelegate(string message);
 	public delegate void ReportProgressMethodDelegate();
 
-	public class CryptographicPrimeGenerator : IDisposable
+	public class CryptographicPrimeGenerator
 	{
 		public static readonly BigInteger Two = new BigInteger(2);
 
@@ -18,7 +18,6 @@ namespace AlgorithmLibrary
 
 		public CryptographicPrimeGenerator(CancellationToken cancellationToken, bool loggingEnabled = false)
 		{
-			disposeCheck();
 			cancelToken = new CancellationToken();
 			if (cancellationToken != null)
 			{
@@ -30,27 +29,6 @@ namespace AlgorithmLibrary
 			}
 		}
 
-		#region IDisposable
-
-		public void Dispose()
-		{
-			if (!IsDisposed)
-			{
-				IsDisposed = true;
-				CryptoRandomSingleton.Dispose();
-			}
-		}
-
-		private void disposeCheck()
-		{
-			if (IsDisposed)
-			{
-				throw new ObjectDisposedException("Algorithm");
-			}
-		}
-
-		#endregion
-
 		/// <summary>
 		/// Returns a probable prime of size bits and will search n rounds for a composite
 		/// </summary>
@@ -59,10 +37,9 @@ namespace AlgorithmLibrary
 		/// <returns></returns>
 		public BigInteger GetProbablePrime(int bitSize, int testCount)
 		{
-			disposeCheck();
 			BigInteger result = 0;
 
-			Console.Write(".");
+			//Log.Message(".");
 			Log.MethodEnter("ProvablePrime", bitSize);
 
 
@@ -160,7 +137,7 @@ namespace AlgorithmLibrary
 				}
 			}
 
-			Console.Write(".");
+			//Log.Message(".");
 			Log.MethodLeave();
 			return result;
 		}

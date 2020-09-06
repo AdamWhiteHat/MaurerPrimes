@@ -65,7 +65,7 @@ namespace AlgorithmLibrary
 					}
 					if (residueX == 1 || residueX == hopefulLess1)
 					{
-						BigInteger gcd = TrialDivision.GCD(residueX - 1, primeHopeful); // Chance to factor: GCD((a^d mod n) − 1, n)
+						BigInteger gcd = BigInteger.GreatestCommonDivisor(residueX - 1, primeHopeful); // Chance to factor: GCD((a^d mod n) − 1, n)
 						if (gcd != 1)
 						{
 							FoundFactor(primeHopeful, gcd);
@@ -89,7 +89,7 @@ namespace AlgorithmLibrary
 							{
 								int pow = (int)dTwoR;
 								BigInteger potentialFactor = BigInteger.Pow(randomA, pow);
-								BigInteger gcd = TrialDivision.GCD(potentialFactor - 1, primeHopeful);
+								BigInteger gcd = BigInteger.GreatestCommonDivisor(potentialFactor - 1, primeHopeful);
 								if (gcd != 1)
 								{
 									FoundFactor(primeHopeful, gcd);
@@ -106,7 +106,7 @@ namespace AlgorithmLibrary
 							BigInteger twoR = BigInteger.Pow(2, (int)divisionCountR);
 							BigInteger dTwoR = BigInteger.Multiply(twoR, quotientD);
 							BigInteger potentialFactor = BigInteger.ModPow(randomA, dTwoR, primeHopeful);
-							BigInteger gcd = TrialDivision.GCD(potentialFactor - 1, primeHopeful);
+							BigInteger gcd = BigInteger.GreatestCommonDivisor(potentialFactor - 1, primeHopeful);
 							if (gcd != 1)
 							{
 								FoundFactor(primeHopeful, gcd);
@@ -125,7 +125,7 @@ namespace AlgorithmLibrary
 						BigInteger twoR = BigInteger.Pow(2, (int)divisionCountR);
 						BigInteger dTwoR = BigInteger.Multiply(twoR, quotientD);
 						BigInteger potentialFactor1 = BigInteger.ModPow(randomA, dTwoR, primeHopeful);
-						BigInteger gcd1 = TrialDivision.GCD(potentialFactor1 - 1, primeHopeful);
+						BigInteger gcd1 = BigInteger.GreatestCommonDivisor(potentialFactor1 - 1, primeHopeful);
 						if (gcd1 != 1)
 						{
 							FoundFactor(primeHopeful, gcd1);
@@ -135,7 +135,7 @@ namespace AlgorithmLibrary
 						{
 							int pow = (int)dTwoR;
 							BigInteger potentialFactor2 = BigInteger.Pow(randomA, pow);
-							BigInteger gcd2 = TrialDivision.GCD(potentialFactor2 - 1, primeHopeful);
+							BigInteger gcd2 = BigInteger.GreatestCommonDivisor(potentialFactor2 - 1, primeHopeful);
 							if (gcd2 != 1)
 							{
 								FoundFactor(primeHopeful, gcd2);
