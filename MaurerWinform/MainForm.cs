@@ -43,14 +43,19 @@ namespace MaurerWinform
 			tbInput.Text = "512";
 			tbSearchDepth.Text = DefaultSearchDepth.ToString();
 
-			algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth, Settings.Logging_Enabled);
+			algorithmWorker = null;
+			//algorithmWorker = new ThreadedAlgorithmWorker(SearchDepth, Settings.Logging_Enabled);
 		}
 
 		private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
 			CryptoRandomSingleton.Dispose();
+			DisposeThreadedAlgorithmWorker();
+		}
 
-			if (!algorithmWorker.IsDisposed)
+		private void DisposeThreadedAlgorithmWorker()
+		{
+			if (algorithmWorker != null && !algorithmWorker.IsDisposed)
 			{
 				algorithmWorker.Dispose();
 				algorithmWorker = null;
@@ -240,11 +245,7 @@ namespace MaurerWinform
 				}
 			}
 
-			if (!algorithmWorker.IsDisposed)
-			{
-				algorithmWorker.Dispose();
-				algorithmWorker = null;
-			}
+			DisposeThreadedAlgorithmWorker();
 
 			IsBusy = false;
 			SetButtonText(true, "Search for primes...");
@@ -486,11 +487,12 @@ namespace MaurerWinform
 				{
 					while (!cancelToken.IsCancellationRequested)
 					{
-						List<long> primes = Eratosthenes.Sieve(lower, upper);
+						BigInteger[] primes = Eratosthenes.Sieve(lower, upper);
 
 						File.AppendAllText(filename, string.Join(Environment.NewLine, primes.Select(l => l.ToString())));
 
-						primes.Clear();
+						primes = new BigInteger[0];
+						primes = null;
 
 						lower = upper + 1;
 						upper = lower + quantityPerRound;
@@ -532,8 +534,7 @@ namespace MaurerWinform
 			}
 			return result;
 		}
-
-
+		
 		#endregion
 
 	}

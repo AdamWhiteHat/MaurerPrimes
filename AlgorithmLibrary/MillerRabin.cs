@@ -19,22 +19,25 @@ namespace AlgorithmLibrary
 
 		public static bool IsProbablyPrime(BigInteger primeHopeful, int testCount)
 		{
+			bool result = false;
+
 			using (outsideExecutionTime.StartTimer())
 			{
-				Log.MethodEnter("MillerRabinPrimalityTest", primeHopeful, testCount);
+				Log.MethodEnter("MillerRabinPrimalityTest", nameof(primeHopeful), $"{primeHopeful}, {nameof(testCount)}: {testCount}");
 
-				if (primeHopeful == 2 || primeHopeful == 3)
+				if (primeHopeful == 2 || primeHopeful == 3 || primeHopeful == 5 || primeHopeful == 7)
 				{
-					Log.MethodLeave();
-					return true;
+					FoundFactor(primeHopeful, BigInteger.GreatestCommonDivisor(primeHopeful, 210));
+					result = true;
+					goto exit;
 				}
 
 				BigInteger remainder = primeHopeful & 1; // % Two;
-
 				if (remainder == 0)
 				{
-					Log.MethodLeave();
-					return false;
+					FoundFactor(primeHopeful, 2);
+					result = false;
+					goto exit;
 				}
 
 				BigInteger hopefulLess1 = primeHopeful - 1;
@@ -51,24 +54,42 @@ namespace AlgorithmLibrary
 				}
 
 				BigInteger hopefulLess2 = primeHopeful - Two;
-				BigInteger randomA = 0;
 				BigInteger residueX;
+				BigInteger priorResidueX;
+				BigInteger randomA = 0;
+
+				// Tracks previous random values, prevents testing with the same value twice, 
+				// which would dramatically reduce our confidence in the primality of a probable prime.
+				// Seems unlikely to happen, but its not a hit to performance to check.
+				List<BigInteger> previousRandomValues = new List<BigInteger>();
 
 				int counter = 1;
 				int modCount = 1;
 				for (counter = 1; counter <= testCount; counter++)
 				{
-					randomA = CryptoRandomSingleton.RandomRange(Two, hopefulLess2);
+					do
+					{
+						randomA = CryptoRandomSingleton.RandomRange(Two, hopefulLess2);
+					}
+					while (previousRandomValues.Contains(randomA));
+					previousRandomValues.Add(randomA);
+
+					Log.Message($"MillerRabin check prime hopeful (P) against random n: {randomA}");
+
 					using (insideExecutionTime.StartTimer())
 					{
 						residueX = BigInteger.ModPow(randomA, quotientD, primeHopeful);
+						Log.Message($"MillerRabin check a^d ≡ r (mod primeHopeful): {randomA}^{quotientD} ≡ {residueX} (mod {primeHopeful})");
 					}
 					if (residueX == 1 || residueX == hopefulLess1)
 					{
 						BigInteger gcd = BigInteger.GreatestCommonDivisor(residueX - 1, primeHopeful); // Chance to factor: GCD((a^d mod n) − 1, n)
-						if (gcd != 1)
+						Log.Message($"A) Chance to factor:  GCD((a^d mod n) − 1, primeHopeful)");
+						if (gcd != 1 && gcd != primeHopeful)
 						{
 							FoundFactor(primeHopeful, gcd);
+							result = false;
+							goto exit;
 						}
 						continue;
 					}
@@ -76,23 +97,27 @@ namespace AlgorithmLibrary
 					modCount = 1;
 					while (modCount <= divisionCountR)
 					{
+						priorResidueX = residueX;
 						residueX = BigInteger.ModPow(residueX, 2, primeHopeful);
+						Log.Message($"MillerRabin check a^2 ≡ r (mod primeHopeful): {priorResidueX}^2 ≡ {residueX} (mod {primeHopeful})");
 
 						if (residueX == 1)
 						{
-							// Chance to factor: a^(d*2^r)-1
-
+							// Chance to factor: a^(d*2^r)-1							
 							BigInteger twoR = BigInteger.Pow(2, (int)divisionCountR);
-							BigInteger dTwoR = BigInteger.Multiply(twoR, quotientD);
+							BigInteger dTwoR = BigInteger.Multiply(quotientD, twoR);
 
 							if (dTwoR < int.MaxValue)
 							{
 								int pow = (int)dTwoR;
-								BigInteger potentialFactor = BigInteger.Pow(randomA, pow);
-								BigInteger gcd = BigInteger.GreatestCommonDivisor(potentialFactor - 1, primeHopeful);
-								if (gcd != 1)
+								BigInteger potentialFactor = BigInteger.Pow(randomA, pow) - 1;
+								BigInteger gcd = BigInteger.GreatestCommonDivisor(potentialFactor, primeHopeful);
+								Log.Message($"B) Chance to factor: GCD(a^(d*(2^r))-1, primeHopeful): GCD({randomA}^({quotientD}*2^{divisionCountR})-1 == {potentialFactor - 1}, primeHopeful) == {gcd}");
+								if (gcd != 1 && gcd != primeHopeful)
 								{
 									FoundFactor(primeHopeful, gcd);
+									result = false;
+									goto exit;
 								}
 							}
 
@@ -102,14 +127,17 @@ namespace AlgorithmLibrary
 
 						if (residueX == hopefulLess1)
 						{
-							// Chance to factor: GCD((a^(d*2^r) mod n) − 1, n)
+							// Chance to factor: GCD((a^(d*2^r) mod n) − 1, n)							
 							BigInteger twoR = BigInteger.Pow(2, (int)divisionCountR);
-							BigInteger dTwoR = BigInteger.Multiply(twoR, quotientD);
+							BigInteger dTwoR = BigInteger.Multiply(quotientD, twoR);
 							BigInteger potentialFactor = BigInteger.ModPow(randomA, dTwoR, primeHopeful);
 							BigInteger gcd = BigInteger.GreatestCommonDivisor(potentialFactor - 1, primeHopeful);
-							if (gcd != 1)
+							Log.Message($"C) Chance to factor: GCD( a^(d*(2^r)) ≡ m−1 (mod primeHopeful) , primeHopeful): GCD( {randomA}^({quotientD}*(2^{divisionCountR})) ≡ {potentialFactor}-1 (mod primeHopeful) == {potentialFactor - 1}, primeHopeful) == {gcd}");
+							if (gcd != 1 && gcd != primeHopeful)
 							{
 								FoundFactor(primeHopeful, gcd);
+								result = false;
+								goto exit;
 							}
 
 							break;
@@ -123,32 +151,29 @@ namespace AlgorithmLibrary
 						// ??? Chance to factor ???
 
 						BigInteger twoR = BigInteger.Pow(2, (int)divisionCountR);
-						BigInteger dTwoR = BigInteger.Multiply(twoR, quotientD);
+						BigInteger dTwoR = BigInteger.Multiply(quotientD, twoR);
 						BigInteger potentialFactor1 = BigInteger.ModPow(randomA, dTwoR, primeHopeful);
 						BigInteger gcd1 = BigInteger.GreatestCommonDivisor(potentialFactor1 - 1, primeHopeful);
-						if (gcd1 != 1)
+						Log.Message($"D) Chance to factor: GCD( a^(d*(2^r)) ≡ m−1 (mod primeHopeful) , primeHopeful): GCD( {randomA}^({quotientD}*(2^{divisionCountR})) ≡ {potentialFactor1}-1 (mod primeHopeful) == {potentialFactor1 - 1}, primeHopeful) == {gcd1}");
+						if (gcd1 != 1 && gcd1 != primeHopeful)
 						{
 							FoundFactor(primeHopeful, gcd1);
+							result = false;
+							goto exit;
 						}
 
-						if (dTwoR < int.MaxValue)
-						{
-							int pow = (int)dTwoR;
-							BigInteger potentialFactor2 = BigInteger.Pow(randomA, pow);
-							BigInteger gcd2 = BigInteger.GreatestCommonDivisor(potentialFactor2 - 1, primeHopeful);
-							if (gcd2 != 1)
-							{
-								FoundFactor(primeHopeful, gcd2);
-							}
-						}
-
-						Log.MethodLeave();
-						return false;
+						result = false;
+						goto exit;
 					}
 				}
-				Log.MethodLeave();
-				return true;
+
+				result = true;
+				goto exit;
 			}
+
+		exit:
+			Log.MethodLeave();
+			return result;
 		}
 
 		public static void FoundFactor(BigInteger n, BigInteger factor)

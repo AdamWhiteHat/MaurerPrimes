@@ -9,8 +9,8 @@ namespace AlgorithmLibrary
 		public static string LogFilename { get; set; }
 		public static TimeSpan TotalExecutionTime { get { return executionTimer.TotalTime; } }
 		private static AggregateTimer executionTimer { get; }
-		
-		private static bool loggingEnabled;		
+
+		private static bool loggingEnabled;
 		private static DepthCounter depth; // Use a class instead of mutating a static variable
 
 		static Log()
@@ -33,13 +33,26 @@ namespace AlgorithmLibrary
 		{
 			if (loggingEnabled)
 			{
-				Message("{0}({1})", methodName, string.Join(", ", args));
-				Message("{");				
+				Message($"{methodName}({string.Join(", ", args)})");
+				Message("{");
 			}
 			// If we turn logging off for a while, then back on
 			// we still want the depth to be correct when you turn it back on.
 			// Otherwise it doesn't line up at the end.
-			depth.Increase(); 
+			depth.Increase();
+		}
+
+		public static void MethodEnter(string methodName, string parameterName, object parameter)
+		{
+			if (loggingEnabled)
+			{
+				Message($"{methodName}({parameterName}: {parameter})");
+				Message("{");
+			}
+			// If we turn logging off for a while, then back on
+			// we still want the depth to be correct when you turn it back on.
+			// Otherwise it doesn't line up at the end.
+			depth.Increase();
 		}
 
 		public static void MethodLeave()

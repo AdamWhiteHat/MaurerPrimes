@@ -17,15 +17,12 @@ namespace AlgorithmLibrary
 				throw new ArgumentException("bits > 20");
 			}
 
-			Log.MethodEnter("TrialDivision.CheckForSmallComposites", bits);
+			Log.MethodEnter("TrialDivision.CheckForSmallComposites", nameof(bits), bits);
+			BigInteger result = 0;
 
 			using (executionTimer.StartTimer())
 			{
-				BigInteger result = 0;
-				List<long> lucky = null;
-
 				long n = 0;
-				long upperBound = 0;
 				bool composite = true;
 				while (composite)
 				{
@@ -36,19 +33,13 @@ namespace AlgorithmLibrary
 						n |= CryptoRandomSingleton.Next(2) << i;
 					}
 
-					upperBound = (long)Math.Sqrt(n);
-					lucky = Eratosthenes.Sieve(upperBound);
-					composite = lucky.Any(l => ((n % l) == 0));
-
-					if (!composite)
-					{
-						result = n;
-					}
+					composite = !Eratosthenes.IsPrime(n);
 				}
-
-				Log.MethodLeave();
-				return result;
+				result = n;
 			}
+
+			Log.MethodLeave();
+			return result;
 		}
 	}
 }

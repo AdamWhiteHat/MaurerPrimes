@@ -40,8 +40,7 @@ namespace AlgorithmLibrary
 			BigInteger result = 0;
 
 			//Log.Message(".");
-			Log.MethodEnter("ProvablePrime", bitSize);
-
+			Log.MethodEnter("ProvablePrime", nameof(bitSize), bitSize);
 
 			if (cancelToken.IsCancellationRequested)
 			{
@@ -58,15 +57,14 @@ namespace AlgorithmLibrary
 			}
 			else
 			{
-				bool done = false;
-				double c = 0.1;
+				//double c = 0.1;
 				int m = 20;
 				double r = 0.5;
 
 				if (bitSize > 2 * m)
 				{
 					double rnd = 0;
-					done = false;
+					bool done = false;
 					while (!done)
 					{
 						rnd = CryptoRandomSingleton.NextDouble();
@@ -90,9 +88,6 @@ namespace AlgorithmLibrary
 				BigInteger Q = Two * smallPrime;
 				BigInteger I = pow / Q;
 
-				long sieveMax = (long)(c * bitSize * bitSize);
-				List<long> primes = Eratosthenes.Sieve(sieveMax);
-
 				bool success = false;
 				while (!success)
 				{
@@ -105,7 +100,6 @@ namespace AlgorithmLibrary
 
 					//LogMethod("Loop[{0}]: TestComposite({1})", _loopCount, result);
 
-					done = false;
 					BigInteger J = I + 1;
 					BigInteger K = 2 * I;
 					BigInteger rand1 = CryptoRandomSingleton.RandomRange(J, K);
@@ -113,14 +107,17 @@ namespace AlgorithmLibrary
 					result = result * smallPrime;
 					result = result + 1;
 
-					BigInteger mod = new BigInteger();
-					for (int i = 0; !done && i < primes.Count; i++)
+					bool isPrime = false;
+					if (Eratosthenes.IsTooLarge(result))
 					{
-						mod = result % primes[i];
-						done = mod == 0;
+						isPrime = true;
+					}
+					else
+					{
+						isPrime = Eratosthenes.IsPrime(result);
 					}
 
-					if (!done)
+					if (isPrime)
 					{
 						//LogMethod("ProvablePrime.RandomRange(J: {0}, K: {1}) = {2}", J, K, rand1);
 						if (MillerRabin.IsProbablyPrime(result, testCount))
