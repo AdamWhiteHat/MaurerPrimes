@@ -3,6 +3,8 @@ namespace MaurerWinform
 {
 	public static class Settings
 	{
+		public static int Default_BitSize = SettingsReader.GetSetting<int>("Default.BitSize");
+
 		public static bool Verbose_Mode = SettingsReader.GetSetting<bool>("Verbose.Mode");
 		public static bool Logging_Enabled = SettingsReader.GetSetting<bool>("Logging.Enabled");
 
@@ -12,6 +14,6 @@ namespace MaurerWinform
 		public static string LogFile_Exceptions = SettingsReader.GetSetting<string>("LogFile.Exceptions");
 
 		public static int Search_Depth = SettingsReader.GetSetting<int>("Search.Depth");
-		public static int ThreadSleep_Duration = SettingsReader.GetSetting<int>("ThreadSleep.Duration");		
+		public static int ThreadSleep_Duration = SettingsReader.GetSetting<int>("ThreadSleep.Duration");
 	}
 }

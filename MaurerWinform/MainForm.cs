@@ -40,7 +40,7 @@ namespace MaurerWinform
 			Log.LogFilename = Settings.LogFile_Methods;
 			Log.SetLoggingPreference(Settings.Logging_Enabled);
 
-			tbInput.Text = "512";
+			tbInput.Text = Settings.Default_BitSize.ToString();
 			tbSearchDepth.Text = DefaultSearchDepth.ToString();
 
 			algorithmWorker = null;
@@ -534,7 +534,7 @@ namespace MaurerWinform
 			}
 			return result;
 		}
-		
+
 		#endregion
 
 	}
